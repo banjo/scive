@@ -44,7 +44,7 @@ export const main = defineCommand({
             ScafkitService.init();
         }
 
-        ScafkitService.removeUnsyncedTemplates();
+        ScafkitService.handleUnsyncedTemplates();
     },
     run: async ctx => {
         Logger.debug("Running main command");

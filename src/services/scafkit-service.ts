@@ -3,7 +3,8 @@ import { Logger } from "@/logger";
 import { Config } from "@/models/config-model";
 import { Template } from "@/models/template-model";
 import { FileService } from "@/services/file-service";
-import { tryOrDefault } from "@banjoanton/utils";
+import { TemplateService } from "@/services/template-service";
+import { isEmpty, tryOrDefault } from "@banjoanton/utils";
 
 export const init = () => {
     const hasFolderDirectory = FileService.checkIfExists(FOLDER_DIRECTORY);
@@ -12,9 +13,7 @@ export const init = () => {
         FileService.createDirectory(FOLDER_DIRECTORY);
     }
 
-    const fileExists = tryOrDefault(() => {
-        return FileService.readFile(SCAFKIT_JSON_DIRECTORY);
-    });
+    const fileExists = tryOrDefault(() => FileService.readFile(SCAFKIT_JSON_DIRECTORY));
 
     if (!fileExists) {
         Logger.debug(`Creating: ${SCAFKIT_JSON_DIRECTORY}`);
@@ -31,9 +30,7 @@ export const init = () => {
     }
 };
 
-const hasInitiated = () => {
-    return FileService.checkIfExists(SCAFKIT_JSON_DIRECTORY);
-};
+const hasInitiated = () => FileService.checkIfExists(SCAFKIT_JSON_DIRECTORY);
 
 const loadConfig = () => {
     Logger.debug(`Loading config from ${SCAFKIT_JSON_DIRECTORY}`);
@@ -74,13 +71,17 @@ const getTemplates = () => {
     return config.templates;
 };
 
-const removeUnsyncedTemplates = () => {
+/**
+ * Removes config without a corresponding template file.
+ * Adds basic config for template files without a corresponding config.
+ */
+const handleUnsyncedTemplates = () => {
     const config = loadConfig();
     const configTemplates = config.templates;
 
     const templateFiles = FileService.readDirectory(TEMPLATES_DIRECTORY);
 
-    const templateFilesToRemove = templateFiles.filter(templateFile => {
+    const templatesToAddConfigFor = templateFiles.filter(templateFile => {
         const templateConfig = configTemplates.find(template => template.id === templateFile);
         return !templateConfig;
     });
@@ -92,20 +93,22 @@ const removeUnsyncedTemplates = () => {
         })
     );
 
-    if (templateFilesToRemove.length === 0 && templateConfigsToRemove.size === 0) {
+    if (isEmpty(templatesToAddConfigFor) && isEmpty(templateConfigsToRemove)) {
         Logger.debug("No unsynced templates found");
         return;
     }
 
-    if (templateFilesToRemove.length > 0) {
-        Logger.debug("Removing unsynced templates");
-        for (const templateFile of templateFilesToRemove) {
-            Logger.debug(`Removing ${templateFile}`);
-            FileService.removeFile(`${TEMPLATES_DIRECTORY}/${templateFile}`);
+    if (!isEmpty(templatesToAddConfigFor)) {
+        Logger.debug("Adding config for unsynced templates");
+        for (const templateFile of templatesToAddConfigFor) {
+            Logger.debug(`Adding ${templateFile}`);
+            const templateConfig = TemplateService.getTemplateInfoFromContent(templateFile);
+            config.templates.push(templateConfig);
         }
+        updateConfig(config);
     }
 
-    if (templateConfigsToRemove.size > 0) {
+    if (!isEmpty(templateConfigsToRemove)) {
         Logger.debug("Removing unsynced template configs");
         config.templates = configTemplates.filter(
             templateConfig => !templateConfigsToRemove.has(templateConfig)
@@ -120,6 +123,6 @@ export const ScafkitService = {
     loadConfig,
     updateConfig,
     addTemplateConfig,
-    removeUnsyncedTemplates,
+    handleUnsyncedTemplates,
     getTemplates,
 };

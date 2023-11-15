@@ -24,6 +24,38 @@ const parseTemplateVariableNames = (content: string) => {
     return [...new Set(variableNames)];
 };
 
+const getTemplateInfoFromContent = (id: string) => {
+    const templateDirectory = `${TEMPLATES_DIRECTORY}/${id}`;
+
+    const templateFiles = FileService.readDirectory(templateDirectory, true);
+
+    const templateSummary = templateFiles.map(fileName => {
+        const content = FileService.readFile(`${templateDirectory}/${fileName}`);
+        if (!content) {
+            Logger.error(`Could not read file ${fileName}`);
+            process.exit(1);
+        }
+        return { content, fileName };
+    });
+
+    const templateVariables = templateSummary.reduce((acc, file) => {
+        const variables = parseTemplateVariableNames(file.content);
+        const nameVariables = parseTemplateVariableNames(file.fileName);
+        return [...acc, ...variables, ...nameVariables];
+    }, [] as string[]);
+
+    const template = Template.from({
+        id,
+        description: "Scafkit template",
+        name: id,
+        tags: [],
+        files: templateFiles,
+        variables: templateVariables,
+    });
+
+    return template;
+};
+
 const createTemplate = async () => {
     Logger.log("Create template");
 
@@ -204,4 +236,5 @@ export const TemplateService = {
     parseTemplateVariableNames,
     runTemplate,
     listTemplates,
+    getTemplateInfoFromContent,
 };

@@ -23,7 +23,9 @@ export const main = defineCommand({
         helloWorld: () => import("@/commands/hello-world").then(m => m.helloWorldCommand),
     },
     setup: ctx => {
-        if (ctx.args.debug) {
+        const config = ScafkitService.loadConfig();
+
+        if (ctx.args.debug || config.debug) {
             setDebug(true);
             Logger.debug("Debug mode enabled");
         }
@@ -38,7 +40,5 @@ export const main = defineCommand({
             Logger.debug("Initializing scafkit");
             await ScafkitService.init();
         }
-
-        console.log("Hello world!");
     },
 });

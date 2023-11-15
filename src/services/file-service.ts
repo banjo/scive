@@ -1,4 +1,5 @@
 import { Logger } from "@/logger";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 
 type TemplateFileProps = {
@@ -18,6 +19,17 @@ const writeFile = async ({ content, path }: TemplateFileProps) => {
 
 const readFile = async (path: string) => {
     const content = await fs.readFile(path, "utf8");
+
+    if (!content) {
+        Logger.error(`Could not read file ${path}`);
+        return undefined;
+    }
+
+    return content;
+};
+
+const readFileSync = (path: string) => {
+    const content = fsSync.readFileSync(path, "utf8");
 
     if (!content) {
         Logger.error(`Could not read file ${path}`);
@@ -49,6 +61,7 @@ const checkIfExists = async (path: string) => {
 export const FileService = {
     writeFile,
     readFile,
+    readFileSync,
     createDirectory,
     checkIfExists,
 };

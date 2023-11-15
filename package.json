@@ -1,0 +1,71 @@
+{
+    "name": "scafkit",
+    "type": "module",
+    "version": "0.0.1",
+    "private": false,
+    "description": "",
+    "author": "Anton Ödman <anton.odman@gmail.com>",
+    "license": "MIT",
+    "homepage": "https://github.com/banjo/scafkit#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/banjo/scafkit.git"
+    },
+    "bugs": "https://github.com/banjo/scafkit/issues",
+    "keywords": [],
+    "sideEffects": false,
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": "dist/bin.js",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "preview": "node dist/bin.js",
+        "dev": "tsup --watch",
+        "lint": "eslint --ext .js,.ts,.json .",
+        "prepublishOnly": "nr build",
+        "release": "bumpp && npm publish",
+        "start": "tsx src/bin.ts",
+        "test": "vitest --watch=false",
+        "test:dev": "vitest",
+        "typecheck": "tsc --noEmit",
+        "format": "prettier --write ."
+    },
+    "dependencies": {
+        "citty": "^0.1.4",
+        "consola": "^3.2.3",
+        "debug": "^4.3.4",
+        "handlebars": "^4.7.8",
+        "picocolors": "^1.0.0"
+    },
+    "devDependencies": {
+        "@antfu/ni": "^0.21.9",
+        "@banjoanton/eslint-config": "^0.1.13",
+        "@banjoanton/prettier-config": "^0.1.10",
+        "@banjoanton/utils": "^0.1.56",
+        "@types/debug": "^4.1.12",
+        "@types/node": "^20.9.0",
+        "bumpp": "^9.2.0",
+        "eslint": "^8.53.0",
+        "hoks": "^0.1.17",
+        "pnpm": "^8.10.5",
+        "prettier": "^3.1.0",
+        "tsup": "^7.2.0",
+        "tsx": "^4.1.2",
+        "type-fest": "^4.7.1",
+        "typescript": "^5.2.2",
+        "vite": "^4.5.0",
+        "vitest": "^0.34.6"
+    },
+    "prettier": "@banjoanton/prettier-config"
+}

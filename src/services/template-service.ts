@@ -6,6 +6,7 @@ import { FileService } from "@/services/file-service";
 import { ScafkitService } from "@/services/scafkit-service";
 import { newline, standout } from "@/utils/cli-util";
 import { uniq } from "@banjoanton/utils";
+import { globby } from "globby";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
 
@@ -29,8 +30,9 @@ const createTemplate = async () => {
     Logger.log("Create template");
 
     const fileName = await CommandService.promptInput({
-        message: `Template file name with extension ${standout("(e.g. use{{name}}.ts)")}`,
+        message: `Template file name with extension`,
     });
+
     const nameWithHbs = fileName.endsWith(".hbs") ? fileName : `${fileName}.hbs`;
     const newPath = `${TEMPLATES_DIRECTORY}/${nameWithHbs}`;
 
@@ -62,11 +64,11 @@ const createTemplate = async () => {
     };
 
     const name = await CommandService.promptInput({
-        message: "Template name [for scafkit use]",
+        message: `Template name ${standout("[for scafkit use]")}`,
         onError: onPromptError,
     });
     const description = await CommandService.promptInput({
-        message: "Template description [for scafkit use]",
+        message: `Template description ${standout("[for scafkit use]")}`,
         onError: onPromptError,
     });
     const tags = await CommandService.promptInput({
@@ -90,8 +92,73 @@ const createTemplate = async () => {
     ScafkitService.addTemplateConfig(template);
 };
 
+const runTemplate = async () => {
+    const templates = ScafkitService.getTemplates();
+
+    if (templates.length === 0) {
+        Logger.error("No templates found, create one first");
+        process.exit(1);
+    }
+
+    const templateName = await CommandService.promptSelect({
+        message: "Select template",
+        options: templates.map(template => ({
+            value: template.name,
+            label: template.name,
+            hint: template.description,
+        })),
+    });
+
+    const template = templates.find(t => t.name === templateName);
+
+    if (!template) {
+        Logger.error(`Template ${standout(templateName)} not found`);
+        process.exit(1);
+    }
+
+    const templateVariables = template.variables;
+
+    const templateData: UnknownRecord = {};
+    for (const variable of templateVariables) {
+        const value = await CommandService.promptInput({
+            message: `Enter value for ${standout(variable)}`,
+        });
+        templateData[variable] = value;
+    }
+
+    const templateContent = FileService.readFile(
+        `${TEMPLATES_DIRECTORY}/${template.templateFileName}`
+    );
+
+    if (!templateContent) {
+        Logger.error(`Could not read template file ${template.templateFileName}`);
+        process.exit(1);
+    }
+
+    const parsedTemplate = parseTemplate(templateContent, templateData);
+    const parsedFileName = parseTemplate(template.templateFileName, templateData);
+
+    const subdirectories = await globby("**/*", {
+        onlyDirectories: true,
+        gitignore: true,
+        cwd: process.cwd(),
+    });
+
+    const directory = await CommandService.promptSelect({
+        message: "Select directory",
+        options: subdirectories.map(subdirectory => ({ value: subdirectory, label: subdirectory })),
+    });
+
+    const newPath = `${directory}/${parsedFileName.replace(".hbs", "")}`;
+
+    FileService.writeFile({ path: newPath, content: parsedTemplate });
+    newline();
+    Logger.success(`Created ${newPath}`);
+};
+
 export const TemplateService = {
     parseTemplate,
     createTemplate,
     parseTemplateVariableNames,
+    runTemplate,
 };

@@ -1,4 +1,4 @@
-import { Command, commandMap, COMMANDS } from "@/commands";
+import { Command, commandAction, commandDescription, COMMANDS } from "@/commands";
 import { Logger } from "@/logger";
 import { setDebug } from "@/runtime";
 import { CommandService } from "@/services/cli-service";
@@ -24,6 +24,7 @@ export const main = defineCommand({
         },
     },
     subCommands: {
+        run: () => import("@/commands/run").then(m => m.runCommand),
         create: () => import("@/commands/create").then(m => m.createCommand),
     },
     setup: ctx => {
@@ -49,11 +50,15 @@ export const main = defineCommand({
 
         const commandName = await CommandService.promptSelect({
             message: "What action do you want to take?",
-            options: COMMANDS.map(c => ({ label: capitalize(c), value: c })),
+            options: COMMANDS.map(c => ({
+                label: capitalize(c),
+                value: c,
+                hint: commandDescription[c],
+            })),
         });
 
         Logger.debug(`Selected command ${standout(commandName)}`);
-        const command = commandMap[commandName as Command];
+        const command = commandAction[commandName as Command];
         await command();
     },
 });

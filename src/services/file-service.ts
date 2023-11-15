@@ -57,8 +57,8 @@ const removeFile = (path: string) => {
     }
 };
 
-const readDirectory = (path: string) => {
-    const files = tryOrDefault(() => fs.readdirSync(path));
+const readDirectory = (path: string, recursive = false) => {
+    const files = tryOrDefault(() => fs.readdirSync(path, { recursive }));
 
     if (!files) {
         Logger.debug(`Could not read directory ${path}`);

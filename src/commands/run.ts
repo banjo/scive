@@ -1,13 +1,13 @@
 import { commandAction, commandDescription } from "@/commands";
 import { defineCommand } from "citty";
 
-export const createCommand = defineCommand({
+export const runCommand = defineCommand({
     meta: {
-        name: "create",
-        description: commandDescription.create,
+        name: "run",
+        description: commandDescription.run,
     },
     args: {},
     run: async () => {
-        await commandAction.create();
+        await commandAction.run();
     },
 });

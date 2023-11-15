@@ -48,7 +48,7 @@ const loadConfig = () => {
     });
 
     if (!config) {
-        Logger.error(`Could not load config from ${SCAFKIT_JSON_DIRECTORY}, using default config`);
+        Logger.debug(`Could not load config from ${SCAFKIT_JSON_DIRECTORY}, using default config`);
         return Config.default;
     }
 
@@ -67,6 +67,11 @@ const addTemplateConfig = (template: Template) => {
     const config = loadConfig();
     config.templates.push(template);
     updateConfig(config);
+};
+
+const getTemplates = () => {
+    const config = loadConfig();
+    return config.templates;
 };
 
 const removeUnsyncedTemplates = () => {
@@ -118,4 +123,5 @@ export const ScafkitService = {
     updateConfig,
     addTemplateConfig,
     removeUnsyncedTemplates,
+    getTemplates,
 };

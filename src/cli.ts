@@ -1,7 +1,7 @@
 import { Command, commandAction, commandDescription, COMMANDS } from "@/commands";
 import { Logger } from "@/logger";
 import { setDebug } from "@/runtime";
-import { CommandService } from "@/services/cli-service";
+import { CliService } from "@/services/cli-service";
 import { ScafkitService } from "@/services/scafkit-service";
 import { standout } from "@/utils/cli-util";
 import { capitalize } from "@banjoanton/utils";
@@ -49,7 +49,7 @@ export const main = defineCommand({
     run: async ctx => {
         Logger.debug("Running main command");
 
-        const commandName = await CommandService.promptSelect({
+        const commandName = await CliService.select({
             message: "What action do you want to take?",
             options: COMMANDS.map(c => ({
                 label: capitalize(c),

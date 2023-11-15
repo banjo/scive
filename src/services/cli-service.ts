@@ -2,7 +2,6 @@ import { Logger } from "@/logger";
 import { Callback, isSymbol } from "@banjoanton/utils";
 import consola from "consola";
 import { execa, Options } from "execa";
-import { globby } from "globby";
 
 const execute = async (command: string, opt?: Options) => {
     const args = command.split(" ");
@@ -14,7 +13,7 @@ const execute = async (command: string, opt?: Options) => {
     }
 };
 
-const promptInput = async ({
+const input = async ({
     message,
     onError,
     defaultValue,
@@ -43,7 +42,7 @@ const promptInput = async ({
     return res ?? "";
 };
 
-const promptSelect = async ({
+const select = async ({
     message,
     onError,
     options,
@@ -63,13 +62,7 @@ const promptSelect = async ({
     return res as unknown as string; // bug with consola types, it returns a string
 };
 
-const promptConfirm = async ({
-    message,
-    defaultValue,
-}: {
-    message: string;
-    defaultValue: boolean;
-}) => {
+const confirm = async ({ message, defaultValue }: { message: string; defaultValue: boolean }) => {
     const res = await consola.prompt(message, { type: "confirm", initial: defaultValue });
 
     if (isSymbol(res)) {
@@ -80,28 +73,9 @@ const promptConfirm = async ({
     return res;
 };
 
-const promptDirectory = async () => {
-    const subdirectories = await globby("**/*", {
-        onlyDirectories: true,
-        gitignore: true,
-        cwd: process.cwd(),
-    });
-
-    const directory = await promptSelect({
-        message: "Select directory",
-        options: subdirectories.map(subdirectory => ({
-            value: subdirectory,
-            label: subdirectory,
-        })),
-    });
-
-    return directory;
-};
-
-export const CommandService = {
+export const CliService = {
     execute,
-    promptInput,
-    promptSelect,
-    promptConfirm,
-    promptDirectory,
+    input,
+    select,
+    confirm,
 };

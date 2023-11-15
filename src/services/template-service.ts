@@ -1,11 +1,12 @@
 import { TEMPLATES_DIRECTORY } from "@/constants";
 import { Logger } from "@/logger";
 import { Template } from "@/models/template-model";
-import { CommandService } from "@/services/cli-service";
+import { CliService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
+import { PromptService } from "@/services/prompt-service";
 import { ScafkitService } from "@/services/scafkit-service";
 import { dim, highlight, newline, standout } from "@/utils/cli-util";
-import { isUUID, uuid } from "@banjoanton/utils";
+import { isUUID, uniq, uuid } from "@banjoanton/utils";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
 
@@ -20,7 +21,7 @@ const parseTemplateVariableNames = (content: string) => {
     }
 
     const variableNames = matches.map(match => match.replace("{{", "").replace("}}", ""));
-    return [...new Set(variableNames)];
+    return uniq(variableNames);
 };
 
 /**
@@ -47,14 +48,9 @@ const sanitizeFolder = (folderName: string) => {
     return { id, name };
 };
 
-const getTemplateInfoFromContent = (folderName: string) => {
-    const { id, name } = sanitizeFolder(folderName);
-    const templateDirectory = `${TEMPLATES_DIRECTORY}/${id}`;
-
-    const templateFiles = FileService.readDirectory(templateDirectory, true);
-
-    const templateSummary = templateFiles.map(fileName => {
-        const content = FileService.readFile(`${templateDirectory}/${fileName}`);
+const getVariablesFromFiles = (files: string[], folderPath: string) => {
+    const templateSummary = files.map(fileName => {
+        const content = FileService.readFile(`${folderPath}/${fileName}`);
         if (!content) {
             Logger.error(`Could not read file ${fileName}`);
             process.exit(1);
@@ -67,6 +63,16 @@ const getTemplateInfoFromContent = (folderName: string) => {
         const nameVariables = parseTemplateVariableNames(file.fileName);
         return [...acc, ...variables, ...nameVariables];
     }, [] as string[]);
+
+    return templateVariables;
+};
+
+const getTemplateInfoFromContent = (folderName: string) => {
+    const { id, name } = sanitizeFolder(folderName);
+    const templateDirectory = `${TEMPLATES_DIRECTORY}/${id}`;
+
+    const templateFiles = FileService.readDirectory(templateDirectory, true);
+    const templateVariables = getVariablesFromFiles(templateFiles, templateDirectory);
 
     const template = Template.from({
         description: "Scafkit template",
@@ -85,7 +91,7 @@ const createTemplateFromWizard = async (id: string) => {
     let continueAddingFiles = true;
 
     while (continueAddingFiles) {
-        const fileName = await CommandService.promptInput({
+        const fileName = await CliService.input({
             message: `Template file name with extension`,
             required: true,
         });
@@ -104,8 +110,7 @@ const createTemplateFromWizard = async (id: string) => {
         Logger.info(
             `Create the template file using ${standout("handlebars")}, save and close when ready`
         );
-        await CommandService.execute(`code --wait ${newPath}`);
-
+        await CliService.execute(`code --wait ${newPath}`);
         const fileContent = FileService.readFile(newPath);
 
         if (!fileContent) {
@@ -115,7 +120,7 @@ const createTemplateFromWizard = async (id: string) => {
 
         files.push({ content: fileContent, name: nameWithHbs });
 
-        continueAddingFiles = await CommandService.promptConfirm({
+        continueAddingFiles = await CliService.confirm({
             message: `Add another file?`,
             defaultValue: false,
         });
@@ -128,30 +133,15 @@ const createTemplateFromWizard = async (id: string) => {
     }, [] as string[]);
 
     const onError = () => {
-        Logger.error(`Could not prompt input`);
+        Logger.error(`Could not get prompt`);
         const newPath = `${TEMPLATES_DIRECTORY}/${id}`;
         FileService.removeDirectory(newPath);
     };
 
-    const name = await CommandService.promptInput({
-        message: `Template name ${standout("[for scafkit use]")}`,
-        onError,
-        required: true,
-    });
-    const description = await CommandService.promptInput({
-        message: `Template description ${standout("[for scafkit use]")}`,
-        onError,
-        required: true,
-    });
-    const tags = await CommandService.promptInput({
-        message: `Template tags ${standout("[comma separated]")}`,
-        onError,
-    });
-    const variables = await CommandService.promptInput({
-        message: `Template variables ${standout("[comma separated]")}`,
-        onError,
-        defaultValue: addedVariables.join(","),
-    });
+    const name = await PromptService.templateName(onError);
+    const description = await PromptService.templateDescription(onError);
+    const tags = await PromptService.templateTags(onError);
+    const variables = await PromptService.templateVariables(addedVariables, onError);
 
     const template = Template.from({
         id,
@@ -168,26 +158,32 @@ const createTemplateFromWizard = async (id: string) => {
 };
 
 const createTemplateFromFolder = async (id: string) => {
-    const directory = await CommandService.promptDirectory();
-    FileService.createDirectory(`${TEMPLATES_DIRECTORY}/${id}`);
-    FileService.copyDirectory(
-        `${process.cwd()}/${directory}`,
-        `${TEMPLATES_DIRECTORY}/${id}`,
-        path => `${path}.hbs`
-    );
-    const files = FileService.readDirectory(`${TEMPLATES_DIRECTORY}/${id}`, true);
+    const directory = await PromptService.directory();
 
-    const name = await CommandService.promptInput({
-        message: `Template name ${standout("[for scafkit use]")}`,
-        required: true,
-    });
+    const newPath = `${TEMPLATES_DIRECTORY}/${id}`;
+
+    FileService.createDirectory(newPath);
+    FileService.copyDirectory(`${process.cwd()}/${directory}`, newPath, path => `${path}.hbs`);
+    const files = FileService.readDirectory(newPath, true);
+
+    const onError = () => {
+        Logger.error(`Could not get prompt`);
+        FileService.removeDirectory(newPath);
+    };
+
+    const name = await PromptService.templateName(onError);
+    const description = await PromptService.templateDescription(onError);
+    const tags = await PromptService.templateTags(onError);
+
+    const variables = getVariablesFromFiles(files, newPath);
+    const templateVariables = await PromptService.templateVariables(variables, onError);
 
     const template = Template.from({
         id,
-        description: "Scafkit template from folder",
+        description,
         name,
-        tags: [],
-        variables: [],
+        tags: tags.split(","),
+        variables: templateVariables.split(","),
         files,
     });
 
@@ -199,7 +195,7 @@ const createTemplate = async () => {
     Logger.log("Create template");
     const id = uuid();
 
-    const creationStyle = await CommandService.promptSelect({
+    const creationStyle = await CliService.select({
         message: "Select creation style",
         options: [
             { value: "wizard", label: "Wizard", hint: "Create template through a wizard" },
@@ -226,7 +222,7 @@ const runTemplate = async () => {
         process.exit(1);
     }
 
-    const templateName = await CommandService.promptSelect({
+    const templateName = await CliService.select({
         message: "Select template",
         options: templates.map(template => ({
             value: template.name,
@@ -246,13 +242,13 @@ const runTemplate = async () => {
 
     const templateData: UnknownRecord = {};
     for (const variable of templateVariables) {
-        const value = await CommandService.promptInput({
+        const value = await CliService.input({
             message: `Enter value for ${standout(variable)}`,
         });
         templateData[variable] = value;
     }
 
-    const directory = await CommandService.promptDirectory();
+    const directory = await PromptService.directory();
     const templateFiles = template.files;
 
     for (const file of templateFiles) {
@@ -299,4 +295,5 @@ export const TemplateService = {
     listTemplates,
     getTemplateInfoFromContent,
     sanitizeFolder,
+    getVariablesFromFiles,
 };

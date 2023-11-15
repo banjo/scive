@@ -12,7 +12,8 @@ const writeFile = ({ content, path }: TemplateFileProps) => {
         fs.writeFileSync(path, content);
         return true;
     } catch (error) {
-        Logger.error(`Could not write file ${path}`, error);
+        Logger.error(`Could not write file ${path}`);
+        Logger.debug(error);
         return false;
     }
 };
@@ -33,7 +34,9 @@ const createDirectory = (path: string) => {
         fs.mkdirSync(path);
         return true;
     } catch (error) {
-        Logger.error(`Could not create directory ${path}`, error);
+        Logger.error(`Could not create directory ${path}`);
+        Logger.debug(error);
+
         return false;
     }
 };
@@ -52,7 +55,9 @@ const removeFile = (path: string) => {
         fs.unlinkSync(path);
         return true;
     } catch (error) {
-        Logger.error(`Could not remove file ${path}`, error);
+        Logger.error(`Could not remove file ${path}`);
+        Logger.debug(error);
+
         return false;
     }
 };
@@ -62,7 +67,9 @@ const removeDirectory = (path: string) => {
         fs.rmdirSync(path);
         return true;
     } catch (error) {
-        Logger.error(`Could not remove directory ${path}`, error);
+        Logger.error(`Could not remove directory ${path}`);
+        Logger.debug(error);
+
         return false;
     }
 };
@@ -83,8 +90,41 @@ const moveDirectory = (oldPath: string, newPath: string) => {
         fs.renameSync(oldPath, newPath);
         return true;
     } catch (error) {
-        Logger.error(`Could not move directory ${oldPath} to ${newPath}`, error);
+        Logger.error(`Could not move directory ${oldPath} to ${newPath}`);
+        Logger.debug(error);
+
         return false;
+    }
+};
+
+const copyFile = (oldPath: string, newPath: string) => {
+    try {
+        fs.copyFileSync(oldPath, newPath);
+        return true;
+    } catch (error) {
+        Logger.error(`Could not copy file ${oldPath} to ${newPath}`);
+        Logger.debug(error);
+
+        return false;
+    }
+};
+
+const copyDirectory = (
+    oldPath: string,
+    newPath: string,
+    fileNameHandler?: (path: string) => string
+) => {
+    const files = readDirectory(oldPath, true);
+
+    for (const file of files) {
+        const content = readFile(`${oldPath}/${file}`);
+        if (!content) continue;
+
+        const newFilePath = `${newPath}/${file}`;
+        copyFile(
+            `${oldPath}/${file}`,
+            fileNameHandler ? fileNameHandler(newFilePath) : newFilePath
+        );
     }
 };
 
@@ -97,4 +137,6 @@ export const FileService = {
     readDirectory,
     removeDirectory,
     moveDirectory,
+    copyDirectory,
+    copyFile,
 };

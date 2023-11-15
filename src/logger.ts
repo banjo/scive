@@ -17,8 +17,14 @@ const success = (message: string, ...optionalParams: unknown[]) =>
 const log = (message: string, ...optionalParams: unknown[]) =>
     consola.log(message, ...optionalParams);
 
-const debug = (message: string) => {
-    if (isDebug()) consola.log(`🔍 ${pc.dim(message)}`);
+const debug = (message: string | unknown) => {
+    if (!isDebug()) return;
+
+    if (typeof message === "string") {
+        consola.log(`🔍 ${pc.dim(message)}`);
+    } else {
+        consola.log(message);
+    }
 };
 
 export const Logger = {

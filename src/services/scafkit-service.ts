@@ -86,12 +86,10 @@ const handleUnsyncedTemplates = () => {
         return !templateConfig;
     });
 
-    const templateConfigsToRemove = new Set(
-        configTemplates.filter(templateConfig => {
-            const templateFile = templateFiles.find(tf => tf === templateConfig.id);
-            return !templateFile;
-        })
-    );
+    const templateConfigsToRemove = configTemplates.filter(templateConfig => {
+        const templateFile = templateFiles.find(tf => tf === templateConfig.id);
+        return !templateFile;
+    });
 
     if (isEmpty(templatesToAddConfigFor) && isEmpty(templateConfigsToRemove)) {
         Logger.debug("No unsynced templates found");
@@ -99,7 +97,9 @@ const handleUnsyncedTemplates = () => {
     }
 
     if (!isEmpty(templatesToAddConfigFor)) {
-        Logger.debug("Adding config for unsynced templates");
+        Logger.debug(
+            `Adding config for unsynced templates: ${templatesToAddConfigFor.join(", ")}}`
+        );
         for (const templateFile of templatesToAddConfigFor) {
             Logger.debug(`Adding ${templateFile}`);
             const templateConfig = TemplateService.getTemplateInfoFromContent(templateFile);
@@ -109,9 +109,13 @@ const handleUnsyncedTemplates = () => {
     }
 
     if (!isEmpty(templateConfigsToRemove)) {
-        Logger.debug("Removing unsynced template configs");
+        Logger.debug(
+            `Removing unsynced template configs: ${templateConfigsToRemove
+                .map(t => t.name)
+                .join(", ")}`
+        );
         config.templates = configTemplates.filter(
-            templateConfig => !templateConfigsToRemove.has(templateConfig)
+            templateConfig => !templateConfigsToRemove.includes(templateConfig)
         );
         updateConfig(config);
     }

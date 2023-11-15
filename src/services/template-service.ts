@@ -6,7 +6,6 @@ import { FileService } from "@/services/file-service";
 import { ScafkitService } from "@/services/scafkit-service";
 import { dim, highlight, newline, standout } from "@/utils/cli-util";
 import { isUUID, uuid } from "@banjoanton/utils";
-import { globby } from "globby";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
 
@@ -81,11 +80,7 @@ const getTemplateInfoFromContent = (folderName: string) => {
     return template;
 };
 
-const createTemplate = async () => {
-    Logger.log("Create template");
-
-    const id = uuid();
-
+const createTemplateFromWizard = async (id: string) => {
     const files: { content: string; name: string }[] = [];
     let continueAddingFiles = true;
 
@@ -172,6 +167,57 @@ const createTemplate = async () => {
     Logger.success(`Created template ${highlight(name)}`);
 };
 
+const createTemplateFromFolder = async (id: string) => {
+    const directory = await CommandService.promptDirectory();
+    FileService.createDirectory(`${TEMPLATES_DIRECTORY}/${id}`);
+    FileService.copyDirectory(
+        `${process.cwd()}/${directory}`,
+        `${TEMPLATES_DIRECTORY}/${id}`,
+        path => `${path}.hbs`
+    );
+    const files = FileService.readDirectory(`${TEMPLATES_DIRECTORY}/${id}`, true);
+
+    const name = await CommandService.promptInput({
+        message: `Template name ${standout("[for scafkit use]")}`,
+        required: true,
+    });
+
+    const template = Template.from({
+        id,
+        description: "Scafkit template from folder",
+        name,
+        tags: [],
+        variables: [],
+        files,
+    });
+
+    ScafkitService.addTemplateConfig(template);
+    Logger.success(`Created template ${highlight(name)}`);
+};
+
+const createTemplate = async () => {
+    Logger.log("Create template");
+    const id = uuid();
+
+    const creationStyle = await CommandService.promptSelect({
+        message: "Select creation style",
+        options: [
+            { value: "wizard", label: "Wizard", hint: "Create template through a wizard" },
+            {
+                label: "Folder",
+                value: "folder",
+                hint: "Create template from existing folder",
+            },
+        ],
+    });
+
+    if (creationStyle === "wizard") {
+        await createTemplateFromWizard(id);
+    } else {
+        await createTemplateFromFolder(id);
+    }
+};
+
 const runTemplate = async () => {
     const templates = ScafkitService.getTemplates();
 
@@ -206,17 +252,7 @@ const runTemplate = async () => {
         templateData[variable] = value;
     }
 
-    const subdirectories = await globby("**/*", {
-        onlyDirectories: true,
-        gitignore: true,
-        cwd: process.cwd(),
-    });
-
-    const directory = await CommandService.promptSelect({
-        message: "Select directory",
-        options: subdirectories.map(subdirectory => ({ value: subdirectory, label: subdirectory })),
-    });
-
+    const directory = await CommandService.promptDirectory();
     const templateFiles = template.files;
 
     for (const file of templateFiles) {

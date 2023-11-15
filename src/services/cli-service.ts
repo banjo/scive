@@ -1,7 +1,8 @@
 import { Logger } from "@/logger";
 import { Callback, isSymbol } from "@banjoanton/utils";
 import consola from "consola";
-import { Options, execa } from "execa";
+import { execa, Options } from "execa";
+import { globby } from "globby";
 
 const execute = async (command: string, opt?: Options) => {
     const args = command.split(" ");
@@ -51,7 +52,7 @@ const promptSelect = async ({
     onError?: () => Promise<void> | void;
     options: { value: string; label: string; hint?: string }[];
 }): Promise<string> => {
-    const res = await consola.prompt(message, { type: "select", options: options });
+    const res = await consola.prompt(message, { type: "select", options });
 
     if (isSymbol(res)) {
         if (onError) await onError();
@@ -79,9 +80,28 @@ const promptConfirm = async ({
     return res;
 };
 
+const promptDirectory = async () => {
+    const subdirectories = await globby("**/*", {
+        onlyDirectories: true,
+        gitignore: true,
+        cwd: process.cwd(),
+    });
+
+    const directory = await promptSelect({
+        message: "Select directory",
+        options: subdirectories.map(subdirectory => ({
+            value: subdirectory,
+            label: subdirectory,
+        })),
+    });
+
+    return directory;
+};
+
 export const CommandService = {
     execute,
     promptInput,
     promptSelect,
     promptConfirm,
+    promptDirectory,
 };

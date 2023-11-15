@@ -1,9 +1,9 @@
 import { Logger } from "@/logger";
-import JSON5 from "json5";
+import { Template } from "@/models/template-model";
 
 export type Config = {
     debug: boolean;
-    templates: string[];
+    templates: Template[];
 };
 
 const defaultConfig: Config = {
@@ -13,11 +13,11 @@ const defaultConfig: Config = {
 
 export const Config = {
     from: (config: Config) => config,
-    toJSON: (config: Config) => JSON5.stringify(config, null, 4),
+    toJSON: (config: Config) => JSON.stringify(config, null, 4),
     fromJSON: (json: string) => {
         try {
             Logger.debug("Parsing config from JSON");
-            return JSON5.parse(json) as Config;
+            return JSON.parse(json) as Config;
         } catch {
             Logger.error("Could not parse config from JSON");
             return defaultConfig;

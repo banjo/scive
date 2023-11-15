@@ -20,7 +20,7 @@ export const main = defineCommand({
         },
     },
     subCommands: {
-        helloWorld: () => import("@/commands/hello-world").then(m => m.helloWorldCommand),
+        create: () => import("@/commands/create").then(m => m.createCommand),
     },
     setup: ctx => {
         const config = ScafkitService.loadConfig();

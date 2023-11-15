@@ -1,6 +1,7 @@
 import { FOLDER_DIRECTORY, SCAFKIT_JSON_DIRECTORY, TEMPLATES_DIRECTORY } from "@/constants";
 import { Logger } from "@/logger";
 import { Config } from "@/models/config-model";
+import { Template } from "@/models/template-model";
 import { FileService } from "@/services/file-service";
 import { tryOrDefault, tryOrDefaultAsync } from "@banjoanton/utils";
 
@@ -62,9 +63,16 @@ const updateConfig = async (config: Config) => {
     });
 };
 
+const addTemplateConfig = async (template: Template) => {
+    const config = loadConfig();
+    config.templates.push(template);
+    await updateConfig(config);
+};
+
 export const ScafkitService = {
     init,
     hasInitiated,
     loadConfig,
     updateConfig,
+    addTemplateConfig,
 };

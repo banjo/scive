@@ -45,8 +45,8 @@
         "citty": "^0.1.4",
         "consola": "^3.2.3",
         "debug": "^4.3.4",
+        "execa": "^8.0.1",
         "handlebars": "^4.7.8",
-        "json5": "^2.2.3",
         "picocolors": "^1.0.0"
     },
     "devDependencies": {

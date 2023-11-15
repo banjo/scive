@@ -21,7 +21,7 @@ const readFile = async (path: string) => {
     const content = await fs.readFile(path, "utf8");
 
     if (!content) {
-        Logger.error(`Could not read file ${path}`);
+        Logger.debug(`Could not read file ${path}`);
         return undefined;
     }
 
@@ -58,10 +58,21 @@ const checkIfExists = async (path: string) => {
     }
 };
 
+const removeFile = async (path: string) => {
+    try {
+        await fs.unlink(path);
+        return true;
+    } catch (error) {
+        Logger.error(`Could not remove file ${path}`, error);
+        return false;
+    }
+};
+
 export const FileService = {
     writeFile,
     readFile,
     readFileSync,
     createDirectory,
     checkIfExists,
+    removeFile,
 };

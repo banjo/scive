@@ -1,9 +1,10 @@
 export type Template = {
+    id: string;
     name: string;
     description: string;
     tags: string[];
     variables: string[];
-    templateFileName: string;
+    files: string[];
 };
 
 export const Template = {

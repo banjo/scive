@@ -81,15 +81,13 @@ const removeUnsyncedTemplates = () => {
     const templateFiles = FileService.readDirectory(TEMPLATES_DIRECTORY);
 
     const templateFilesToRemove = templateFiles.filter(templateFile => {
-        const templateConfig = configTemplates.find(
-            template => template.templateFileName === templateFile
-        );
+        const templateConfig = configTemplates.find(template => template.id === templateFile);
         return !templateConfig;
     });
 
     const templateConfigsToRemove = new Set(
         configTemplates.filter(templateConfig => {
-            const templateFile = templateFiles.find(tf => tf === templateConfig.templateFileName);
+            const templateFile = templateFiles.find(tf => tf === templateConfig.id);
             return !templateFile;
         })
     );

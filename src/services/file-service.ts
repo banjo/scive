@@ -57,8 +57,18 @@ const removeFile = (path: string) => {
     }
 };
 
+const removeDirectory = (path: string) => {
+    try {
+        fs.rmdirSync(path);
+        return true;
+    } catch (error) {
+        Logger.error(`Could not remove directory ${path}`, error);
+        return false;
+    }
+};
+
 const readDirectory = (path: string, recursive = false) => {
-    const files = tryOrDefault(() => fs.readdirSync(path, { recursive }));
+    const files = tryOrDefault(() => fs.readdirSync(path, { recursive, encoding: "utf8" }));
 
     if (!files) {
         Logger.debug(`Could not read directory ${path}`);
@@ -75,4 +85,5 @@ export const FileService = {
     checkIfExists,
     removeFile,
     readDirectory,
+    removeDirectory,
 };

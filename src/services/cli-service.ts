@@ -62,8 +62,26 @@ const promptSelect = async ({
     return res as unknown as string; // bug with consola types, it returns a string
 };
 
+const promptConfirm = async ({
+    message,
+    defaultValue,
+}: {
+    message: string;
+    defaultValue: boolean;
+}) => {
+    const res = await consola.prompt(message, { type: "confirm", initial: defaultValue });
+
+    if (isSymbol(res)) {
+        Logger.error(`Could not prompt input`);
+        process.exit(1);
+    }
+
+    return res;
+};
+
 export const CommandService = {
     execute,
     promptInput,
     promptSelect,
+    promptConfirm,
 };

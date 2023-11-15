@@ -5,7 +5,7 @@ import { CommandService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { ScafkitService } from "@/services/scafkit-service";
 import { dim, highlight, newline, standout } from "@/utils/cli-util";
-import { uniq } from "@banjoanton/utils";
+import { uuid } from "@banjoanton/utils";
 import { globby } from "globby";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
@@ -27,42 +27,58 @@ const parseTemplateVariableNames = (content: string) => {
 const createTemplate = async () => {
     Logger.log("Create template");
 
-    const fileName = await CommandService.promptInput({
-        message: `Template file name with extension`,
-        required: true,
-    });
+    const id = uuid();
 
-    const nameWithHbs = fileName.endsWith(".hbs") ? fileName : `${fileName}.hbs`;
-    const newPath = `${TEMPLATES_DIRECTORY}/${nameWithHbs}`;
+    const files: { content: string; name: string }[] = [];
+    let continueAddingFiles = true;
 
-    const fileExists = await FileService.checkIfExists(newPath);
+    while (continueAddingFiles) {
+        const fileName = await CommandService.promptInput({
+            message: `Template file name with extension`,
+            required: true,
+        });
 
-    if (fileExists) {
-        Logger.error(`Template ${standout(nameWithHbs)} already exists`);
-        process.exit(1);
+        const nameWithHbs = fileName.endsWith(".hbs") ? fileName : `${fileName}.hbs`;
+        const newPath = `${TEMPLATES_DIRECTORY}/${id}/${nameWithHbs}`;
+
+        const fileExists = FileService.checkIfExists(newPath);
+
+        if (fileExists) {
+            Logger.error(`Template ${standout(nameWithHbs)} already exists`);
+            process.exit(1);
+        }
+
+        newline();
+        Logger.info(
+            `Create the template file using ${standout("handlebars")}, save and close when ready`
+        );
+        await CommandService.execute(`code --wait ${newPath}`);
+
+        const fileContent = FileService.readFile(newPath);
+
+        if (!fileContent) {
+            Logger.error(`Could not read file ${newPath}`);
+            process.exit(1);
+        }
+
+        files.push({ content: fileContent, name: nameWithHbs });
+
+        continueAddingFiles = await CommandService.promptConfirm({
+            message: `Add another file?`,
+            defaultValue: false,
+        });
     }
 
-    newline();
-    Logger.info(
-        `Create the template file using ${standout("handlebars")}, save and close when ready`
-    );
-    await CommandService.execute(`code --wait ${newPath}`);
-
-    const fileContent = FileService.readFile(newPath);
-
-    if (!fileContent) {
-        Logger.error(`Could not read file ${newPath}`);
-        process.exit(1);
-    }
-
-    const addedVariables = uniq([
-        ...parseTemplateVariableNames(fileContent),
-        ...parseTemplateVariableNames(fileName),
-    ]);
+    const addedVariables = files.reduce((acc, file) => {
+        const fileVariables = parseTemplateVariableNames(file.content);
+        const nameVariables = parseTemplateVariableNames(file.name);
+        return [...acc, ...fileVariables, ...nameVariables];
+    }, [] as string[]);
 
     const onError = () => {
         Logger.error(`Could not prompt input`);
-        FileService.removeFile(newPath);
+        const newPath = `${TEMPLATES_DIRECTORY}/${id}`;
+        FileService.removeDirectory(newPath);
     };
 
     const name = await CommandService.promptInput({
@@ -86,10 +102,11 @@ const createTemplate = async () => {
     });
 
     const template = Template.from({
+        id,
         description,
         name,
         tags: tags.split(","),
-        templateFileName: nameWithHbs,
+        files: files.map(f => f.name),
         variables: variables.split(","),
     });
 
@@ -132,18 +149,6 @@ const runTemplate = async () => {
         templateData[variable] = value;
     }
 
-    const templateContent = FileService.readFile(
-        `${TEMPLATES_DIRECTORY}/${template.templateFileName}`
-    );
-
-    if (!templateContent) {
-        Logger.error(`Could not read template file ${template.templateFileName}`);
-        process.exit(1);
-    }
-
-    const parsedTemplate = parseTemplate(templateContent, templateData);
-    const parsedFileName = parseTemplate(template.templateFileName, templateData);
-
     const subdirectories = await globby("**/*", {
         onlyDirectories: true,
         gitignore: true,
@@ -155,11 +160,27 @@ const runTemplate = async () => {
         options: subdirectories.map(subdirectory => ({ value: subdirectory, label: subdirectory })),
     });
 
-    const newPath = `${directory}/${parsedFileName.replace(".hbs", "")}`;
+    const templateFiles = template.files;
 
-    FileService.writeFile({ path: newPath, content: parsedTemplate });
+    for (const file of templateFiles) {
+        const templateContent = FileService.readFile(
+            `${TEMPLATES_DIRECTORY}/${template.id}/${file}`
+        );
+
+        if (!templateContent) {
+            Logger.error(`Could not read template file ${file}`);
+            process.exit(1);
+        }
+
+        const parsedTemplate = parseTemplate(templateContent, templateData);
+        const parsedFileName = parseTemplate(file, templateData);
+
+        const newPath = `${directory}/${parsedFileName.replace(".hbs", "")}`;
+        FileService.writeFile({ path: newPath, content: parsedTemplate });
+    }
+
     newline();
-    Logger.success(`Created ${newPath}`);
+    Logger.success(`Created ${template.name}`);
 };
 
 const listTemplates = () => {

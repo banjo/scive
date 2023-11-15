@@ -22,7 +22,7 @@ export const commandAction: CommandMap = {
 };
 
 export const commandDescription: Record<Command, string> = {
-    run: "Create a new file from a template",
-    create: "Create a new template via a wizard",
+    run: "Create new files from a template",
+    create: "Create a new template through a wizard",
     list: "List all local templates",
 };

@@ -52,7 +52,7 @@
     },
     "devDependencies": {
         "@antfu/ni": "^0.21.9",
-        "@banjoanton/eslint-config": "^0.1.13",
+        "@banjoanton/eslint-config": "^0.1.14",
         "@banjoanton/prettier-config": "^0.1.10",
         "@banjoanton/utils": "^0.1.56",
         "@types/debug": "^4.1.12",

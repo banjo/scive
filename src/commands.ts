@@ -1,10 +1,10 @@
 import { TemplateService } from "@/services/template-service";
-import { AsyncCallback } from "@banjoanton/utils";
+import { AsyncCallback, Callback } from "@banjoanton/utils";
 
-export const COMMANDS = ["run", "create"] as const;
+export const COMMANDS = ["run", "create", "list"] as const;
 export type Command = (typeof COMMANDS)[number];
 
-export type CommandMap = Record<Command, AsyncCallback>;
+export type CommandMap = Record<Command, AsyncCallback | Callback>;
 
 export const commandAction: CommandMap = {
     run: async () => {
@@ -15,9 +15,14 @@ export const commandAction: CommandMap = {
         await TemplateService.createTemplate();
         process.exit(0);
     },
+    list: () => {
+        TemplateService.listTemplates();
+        process.exit(0);
+    },
 };
 
 export const commandDescription: Record<Command, string> = {
     run: "Create a new file from a template",
     create: "Create a new template via a wizard",
+    list: "List all local templates",
 };

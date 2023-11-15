@@ -1,7 +1,7 @@
 import { Logger } from "@/logger";
-import { isSymbol } from "@banjoanton/utils";
+import { Callback, isSymbol } from "@banjoanton/utils";
 import consola from "consola";
-import { execa, Options } from "execa";
+import { Options, execa } from "execa";
 
 const execute = async (command: string, opt?: Options) => {
     const args = command.split(" ");
@@ -17,20 +17,29 @@ const promptInput = async ({
     message,
     onError,
     defaultValue,
+    required = false,
 }: {
     message: string;
-    onError?: () => Promise<void> | void;
+    onError?: Callback;
     defaultValue?: string;
+    required?: boolean;
 }) => {
-    const res = await consola.prompt(message, { type: "text", initial: defaultValue });
+    let res = undefined;
 
-    if (isSymbol(res) || res === "" || res === undefined) {
-        if (onError) await onError();
-        Logger.error(`Could not prompt input`);
+    if (required) {
+        while (res === undefined || res === "") {
+            res = await consola.prompt(message, { type: "text", initial: defaultValue });
+        }
+    } else {
+        res = await consola.prompt(message, { type: "text", initial: defaultValue });
+    }
+
+    if (isSymbol(res)) {
+        if (onError) onError();
         process.exit(1);
     }
 
-    return res;
+    return res ?? "";
 };
 
 const promptSelect = async ({

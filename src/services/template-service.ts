@@ -4,15 +4,13 @@ import { Template } from "@/models/template-model";
 import { CommandService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { ScafkitService } from "@/services/scafkit-service";
-import { newline, standout } from "@/utils/cli-util";
+import { dim, highlight, newline, standout } from "@/utils/cli-util";
 import { uniq } from "@banjoanton/utils";
 import { globby } from "globby";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
 
-const parseTemplate = (template: string, data: UnknownRecord) => {
-    return Handlebars.compile(template)(data);
-};
+const parseTemplate = (template: string, data: UnknownRecord) => Handlebars.compile(template)(data);
 
 const parseTemplateVariableNames = (content: string) => {
     const regex = /{{(.*?)}}/g;
@@ -31,6 +29,7 @@ const createTemplate = async () => {
 
     const fileName = await CommandService.promptInput({
         message: `Template file name with extension`,
+        required: true,
     });
 
     const nameWithHbs = fileName.endsWith(".hbs") ? fileName : `${fileName}.hbs`;
@@ -44,10 +43,12 @@ const createTemplate = async () => {
     }
 
     newline();
-    Logger.info("Create the template file using handlebars and close the editor when ready");
+    Logger.info(
+        `Create the template file using ${standout("handlebars")}, save and close when ready`
+    );
     await CommandService.execute(`code --wait ${newPath}`);
 
-    const fileContent = await FileService.readFile(newPath);
+    const fileContent = FileService.readFile(newPath);
 
     if (!fileContent) {
         Logger.error(`Could not read file ${newPath}`);
@@ -59,25 +60,28 @@ const createTemplate = async () => {
         ...parseTemplateVariableNames(fileName),
     ]);
 
-    const onPromptError = () => {
+    const onError = () => {
+        Logger.error(`Could not prompt input`);
         FileService.removeFile(newPath);
     };
 
     const name = await CommandService.promptInput({
         message: `Template name ${standout("[for scafkit use]")}`,
-        onError: onPromptError,
+        onError,
+        required: true,
     });
     const description = await CommandService.promptInput({
         message: `Template description ${standout("[for scafkit use]")}`,
-        onError: onPromptError,
+        onError,
+        required: true,
     });
     const tags = await CommandService.promptInput({
         message: `Template tags ${standout("[comma separated]")}`,
-        onError: onPromptError,
+        onError,
     });
     const variables = await CommandService.promptInput({
         message: `Template variables ${standout("[comma separated]")}`,
-        onError: onPromptError,
+        onError,
         defaultValue: addedVariables.join(","),
     });
 
@@ -90,6 +94,8 @@ const createTemplate = async () => {
     });
 
     ScafkitService.addTemplateConfig(template);
+
+    Logger.success(`Created template ${highlight(name)}`);
 };
 
 const runTemplate = async () => {
@@ -156,9 +162,25 @@ const runTemplate = async () => {
     Logger.success(`Created ${newPath}`);
 };
 
+const listTemplates = () => {
+    const templates = ScafkitService.getTemplates();
+
+    if (templates.length === 0) {
+        Logger.warning("No templates found");
+        process.exit(0);
+    }
+
+    newline();
+    Logger.log("Templates");
+    for (const template of templates) {
+        Logger.log(`👉 ${standout(template.name)} - ${dim(template.description)}`);
+    }
+};
+
 export const TemplateService = {
     parseTemplate,
     createTemplate,
     parseTemplateVariableNames,
     runTemplate,
+    listTemplates,
 };

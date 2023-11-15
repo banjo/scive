@@ -26,6 +26,7 @@ export const main = defineCommand({
     subCommands: {
         run: () => import("@/commands/run").then(m => m.runCommand),
         create: () => import("@/commands/create").then(m => m.createCommand),
+        list: () => import("@/commands/list").then(m => m.listCommand),
     },
     setup: ctx => {
         const config = ScafkitService.loadConfig();

@@ -33,7 +33,28 @@ const promptInput = async ({
     return res;
 };
 
+const promptSelect = async ({
+    message,
+    onError,
+    options,
+}: {
+    message: string;
+    onError?: () => Promise<void> | void;
+    options: { value: string; label: string }[];
+}): Promise<string> => {
+    const res = await consola.prompt(message, { type: "select", options: options });
+
+    if (isSymbol(res)) {
+        if (onError) await onError();
+        Logger.error(`Could not prompt input ${message}`);
+        process.exit(1);
+    }
+
+    return res as unknown as string; // bug with consola types, it returns a string
+};
+
 export const CommandService = {
     execute,
     promptInput,
+    promptSelect,
 };

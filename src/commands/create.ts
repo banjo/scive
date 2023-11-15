@@ -1,4 +1,4 @@
-import { TemplateService } from "@/services/template-service";
+import { commandMap } from "@/commands";
 import { defineCommand } from "citty";
 
 export const createCommand = defineCommand({
@@ -8,7 +8,6 @@ export const createCommand = defineCommand({
     },
     args: {},
     run: async () => {
-        await TemplateService.createTemplate();
-        process.exit(0);
+        await commandMap.create();
     },
 });

@@ -57,8 +57,8 @@ const createTemplate = async () => {
         ...parseTemplateVariableNames(fileName),
     ]);
 
-    const onPromptError = async () => {
-        await FileService.removeFile(newPath);
+    const onPromptError = () => {
+        FileService.removeFile(newPath);
     };
 
     const name = await CommandService.promptInput({
@@ -87,7 +87,7 @@ const createTemplate = async () => {
         variables: variables.split(","),
     });
 
-    await ScafkitService.addTemplateConfig(template);
+    ScafkitService.addTemplateConfig(template);
 };
 
 export const TemplateService = {

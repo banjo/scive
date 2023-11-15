@@ -1,4 +1,5 @@
 import { Logger } from "@/logger";
+import { tryOrDefault } from "@banjoanton/utils";
 import fs from "node:fs";
 
 type TemplateFileProps = {
@@ -56,10 +57,22 @@ const removeFile = (path: string) => {
     }
 };
 
+const readDirectory = (path: string) => {
+    const files = tryOrDefault(() => fs.readdirSync(path));
+
+    if (!files) {
+        Logger.debug(`Could not read directory ${path}`);
+        return [];
+    }
+
+    return files;
+};
+
 export const FileService = {
     writeFile,
     readFile,
     createDirectory,
     checkIfExists,
     removeFile,
+    readDirectory,
 };

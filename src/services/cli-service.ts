@@ -19,7 +19,7 @@ const promptInput = async ({
     defaultValue,
 }: {
     message: string;
-    onError?: () => Promise<void>;
+    onError?: () => Promise<void> | void;
     defaultValue?: string;
 }) => {
     const res = await consola.prompt(message, { type: "text", initial: defaultValue });

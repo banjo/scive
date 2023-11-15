@@ -37,6 +37,8 @@ export const main = defineCommand({
             Logger.debug("Initializing scafkit");
             ScafkitService.init();
         }
+
+        ScafkitService.removeUnsyncedTemplates();
     },
     run: ctx => {
         Logger.debug("Running main command");

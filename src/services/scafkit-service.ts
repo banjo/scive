@@ -55,18 +55,60 @@ const loadConfig = () => {
     return config;
 };
 
-const updateConfig = async (config: Config) => {
+const updateConfig = (config: Config) => {
     Logger.debug(`Updating config in ${SCAFKIT_JSON_DIRECTORY}`);
-    await FileService.writeFile({
+    FileService.writeFile({
         path: SCAFKIT_JSON_DIRECTORY,
         content: Config.toJSON(config),
     });
 };
 
-const addTemplateConfig = async (template: Template) => {
+const addTemplateConfig = (template: Template) => {
     const config = loadConfig();
     config.templates.push(template);
-    await updateConfig(config);
+    updateConfig(config);
+};
+
+const removeUnsyncedTemplates = () => {
+    const config = loadConfig();
+    const configTemplates = config.templates;
+
+    const templateFiles = FileService.readDirectory(TEMPLATES_DIRECTORY);
+
+    const templateFilesToRemove = templateFiles.filter(templateFile => {
+        const templateConfig = configTemplates.find(
+            template => template.templateFileName === templateFile
+        );
+        return !templateConfig;
+    });
+
+    const templateConfigsToRemove = new Set(
+        configTemplates.filter(templateConfig => {
+            const templateFile = templateFiles.find(tf => tf === templateConfig.templateFileName);
+            return !templateFile;
+        })
+    );
+
+    if (templateFilesToRemove.length === 0 && templateConfigsToRemove.size === 0) {
+        Logger.debug("No unsynced templates found");
+        return;
+    }
+
+    if (templateFilesToRemove.length > 0) {
+        Logger.debug("Removing unsynced templates");
+        for (const templateFile of templateFilesToRemove) {
+            Logger.debug(`Removing ${templateFile}`);
+            FileService.removeFile(`${TEMPLATES_DIRECTORY}/${templateFile}`);
+        }
+    }
+
+    if (templateConfigsToRemove.size > 0) {
+        Logger.debug("Removing unsynced template configs");
+        config.templates = configTemplates.filter(
+            templateConfig => !templateConfigsToRemove.has(templateConfig)
+        );
+        updateConfig(config);
+    }
 };
 
 export const ScafkitService = {
@@ -75,4 +117,5 @@ export const ScafkitService = {
     loadConfig,
     updateConfig,
     addTemplateConfig,
+    removeUnsyncedTemplates,
 };

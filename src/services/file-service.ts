@@ -1,15 +1,14 @@
 import { Logger } from "@/logger";
-import fsSync from "node:fs";
-import fs from "node:fs/promises";
+import fs from "node:fs";
 
 type TemplateFileProps = {
     path: string;
     content: string;
 };
 
-const writeFile = async ({ content, path }: TemplateFileProps) => {
+const writeFile = ({ content, path }: TemplateFileProps) => {
     try {
-        await fs.writeFile(path, content);
+        fs.writeFileSync(path, content);
         return true;
     } catch (error) {
         Logger.error(`Could not write file ${path}`, error);
@@ -17,8 +16,8 @@ const writeFile = async ({ content, path }: TemplateFileProps) => {
     }
 };
 
-const readFile = async (path: string) => {
-    const content = await fs.readFile(path, "utf8");
+const readFile = (path: string) => {
+    const content = fs.readFileSync(path, "utf8");
 
     if (!content) {
         Logger.debug(`Could not read file ${path}`);
@@ -28,20 +27,9 @@ const readFile = async (path: string) => {
     return content;
 };
 
-const readFileSync = (path: string) => {
-    const content = fsSync.readFileSync(path, "utf8");
-
-    if (!content) {
-        Logger.error(`Could not read file ${path}`);
-        return undefined;
-    }
-
-    return content;
-};
-
-const createDirectory = async (path: string) => {
+const createDirectory = (path: string) => {
     try {
-        await fs.mkdir(path);
+        fs.mkdirSync(path);
         return true;
     } catch (error) {
         Logger.error(`Could not create directory ${path}`, error);
@@ -49,18 +37,18 @@ const createDirectory = async (path: string) => {
     }
 };
 
-const checkIfExists = async (path: string) => {
+const checkIfExists = (path: string) => {
     try {
-        await fs.access(path, fs.constants.F_OK);
+        fs.accessSync(path, fs.constants.F_OK);
         return true;
     } catch {
         return false;
     }
 };
 
-const removeFile = async (path: string) => {
+const removeFile = (path: string) => {
     try {
-        await fs.unlink(path);
+        fs.unlinkSync(path);
         return true;
     } catch (error) {
         Logger.error(`Could not remove file ${path}`, error);
@@ -71,7 +59,6 @@ const removeFile = async (path: string) => {
 export const FileService = {
     writeFile,
     readFile,
-    readFileSync,
     createDirectory,
     checkIfExists,
     removeFile,

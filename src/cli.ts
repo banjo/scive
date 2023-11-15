@@ -29,16 +29,16 @@ export const main = defineCommand({
             setDebug(true);
             Logger.debug("Debug mode enabled");
         }
-    },
-    run: async ctx => {
-        Logger.debug("Running main command");
 
-        const isInitiated = await ScafkitService.hasInitiated();
+        const isInitiated = ScafkitService.hasInitiated();
         if (isInitiated) {
             Logger.debug("Scafkit already initiated");
         } else {
             Logger.debug("Initializing scafkit");
-            await ScafkitService.init();
+            ScafkitService.init();
         }
+    },
+    run: ctx => {
+        Logger.debug("Running main command");
     },
 });

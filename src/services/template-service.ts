@@ -5,7 +5,7 @@ import { CommandService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { ScafkitService } from "@/services/scafkit-service";
 import { dim, highlight, newline, standout } from "@/utils/cli-util";
-import { uuid } from "@banjoanton/utils";
+import { isUUID, uuid } from "@banjoanton/utils";
 import { globby } from "globby";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
@@ -24,7 +24,32 @@ const parseTemplateVariableNames = (content: string) => {
     return [...new Set(variableNames)];
 };
 
-const getTemplateInfoFromContent = (id: string) => {
+/**
+ * Santize folder, checks if it is a valid uuid, if not,
+ * it will create a new uuid and move the folder
+ * @param folderName - folder name
+ * @returns - { id, name }
+ */
+const sanitizeFolder = (folderName: string) => {
+    let id;
+    let name;
+    if (isUUID(folderName)) {
+        id = folderName;
+        name = folderName;
+    } else {
+        id = uuid();
+        name = folderName;
+        FileService.moveDirectory(
+            `${TEMPLATES_DIRECTORY}/${folderName}`,
+            `${TEMPLATES_DIRECTORY}/${id}`
+        );
+    }
+
+    return { id, name };
+};
+
+const getTemplateInfoFromContent = (folderName: string) => {
+    const { id, name } = sanitizeFolder(folderName);
     const templateDirectory = `${TEMPLATES_DIRECTORY}/${id}`;
 
     const templateFiles = FileService.readDirectory(templateDirectory, true);
@@ -45,9 +70,9 @@ const getTemplateInfoFromContent = (id: string) => {
     }, [] as string[]);
 
     const template = Template.from({
-        id,
         description: "Scafkit template",
-        name: id,
+        id,
+        name,
         tags: [],
         files: templateFiles,
         variables: templateVariables,
@@ -237,4 +262,5 @@ export const TemplateService = {
     runTemplate,
     listTemplates,
     getTemplateInfoFromContent,
+    sanitizeFolder,
 };

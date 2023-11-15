@@ -78,6 +78,16 @@ const readDirectory = (path: string, recursive = false) => {
     return files;
 };
 
+const moveDirectory = (oldPath: string, newPath: string) => {
+    try {
+        fs.renameSync(oldPath, newPath);
+        return true;
+    } catch (error) {
+        Logger.error(`Could not move directory ${oldPath} to ${newPath}`, error);
+        return false;
+    }
+};
+
 export const FileService = {
     writeFile,
     readFile,
@@ -86,4 +96,5 @@ export const FileService = {
     removeFile,
     readDirectory,
     removeDirectory,
+    moveDirectory,
 };

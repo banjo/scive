@@ -38,8 +38,8 @@ devDependencies:
     specifier: ^0.1.10
     version: 0.1.10(prettier@3.1.0)
   '@banjoanton/utils':
-    specifier: ^0.1.56
-    version: 0.1.56
+    specifier: ^0.1.57
+    version: 0.1.57
   '@types/debug':
     specifier: ^4.1.12
     version: 4.1.12
@@ -163,8 +163,8 @@ packages:
       prettier: 3.1.0
     dev: true
 
-  /@banjoanton/utils@0.1.56:
-    resolution: {integrity: sha512-0ESiSD7zmHqueyHgTj1PsX7v4ioLlBOoiNsfwwNH9DCnjen66KkFBh5oOylrFZHXm51EwdmvuNqqWqFZG5ASBQ==}
+  /@banjoanton/utils@0.1.57:
+    resolution: {integrity: sha512-jy3YIM0trlIn+fzvn26K2ldoWFCMzt95yyuMBLm3qj2bXLcdMP02tjVzuuGM6prCkuHtLAuzGn+ZQbzbCau8iw==}
     dependencies:
       ohash: 1.1.3
       uncrypto: 0.1.3

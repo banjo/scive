@@ -10,7 +10,7 @@ Scaffold your projects effortlessly with custom templates.
 -   🔮 - Interactive CLI wizard to guide you through new template setup
 -   📑 - Manage multiple file templates with ease
 -   ⚡ - Instantly scaffold new files with a single command
--   🏋️ - Use `Handlebars`` to add dynamic content to your templates
+-   🏋️ - Use `Handlebars` to add dynamic content to your templates
 -   💾 - Local storage of templates for portability and reuse
 -   ✨ - Simplifies repetitive setup tasks and enhances productivity
 

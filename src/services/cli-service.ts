@@ -1,7 +1,7 @@
 import { Logger } from "@/logger";
-import { Callback, isSymbol } from "@banjoanton/utils";
+import { Callback, isSymbol, tryOrDefaultAsync } from "@banjoanton/utils";
 import consola from "consola";
-import { execa, Options } from "execa";
+import { Options, execa } from "execa";
 
 const execute = async (command: string, opt?: Options) => {
     const args = command.split(" ");
@@ -97,11 +97,32 @@ const openDirectory = async (path: string) => {
     await execute(`open ${path}`);
 };
 
+const isCodeInstalled = async () => {
+    const isInstalled = await tryOrDefaultAsync(
+        async () => {
+            await execa("code", ["--version"], {
+                stdio: "ignore",
+            });
+            return true;
+        },
+        { fallbackValue: false }
+    );
+    return isInstalled;
+};
+
 const openInEditor = async (
     path: string,
     config?: { waitForClose: boolean; newWindow: boolean }
 ) => {
     const { waitForClose = true, newWindow = false } = config ?? {};
+
+    const isInstalled = await isCodeInstalled();
+
+    if (!isInstalled) {
+        Logger.warning("Must have VSCode installed to open in editor");
+        return;
+    }
+
     Logger.log(`Opening ${path} in editor${waitForClose ? ", waiting for close" : ""}`);
     await execute(`code ${waitForClose ? "--wait" : ""} ${newWindow ? "-n" : ""} ${path}`);
 };

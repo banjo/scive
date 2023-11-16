@@ -8,7 +8,7 @@ import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
 import { clear, highlight, newline, showHeader, standout } from "@/utils/cli-util";
-import { isUUID, uniq } from "@banjoanton/utils";
+import { isDefined, isUUID, uniq } from "@banjoanton/utils";
 import Handlebars from "handlebars";
 import { randomUUID } from "node:crypto";
 import { UnknownRecord } from "type-fest";
@@ -54,7 +54,7 @@ const sanitizeFolder = (folderName: string) => {
 const getVariablesFromFiles = (files: string[], folderPath: string) => {
     const templateSummary = files.map(fileName => {
         const content = FileService.readFile(`${folderPath}/${fileName}`);
-        if (!content) {
+        if (!isDefined(content)) {
             Logger.error(`Could not read file ${fileName}`);
             process.exit(1);
         }

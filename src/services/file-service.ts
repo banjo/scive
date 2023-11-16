@@ -1,14 +1,30 @@
 import { Logger } from "@/logger";
-import { tryOrDefault } from "@banjoanton/utils";
+import { Maybe, tryOrDefault } from "@banjoanton/utils";
 import fs from "node:fs";
+import { dirname } from "node:path";
 
 type TemplateFileProps = {
     path: string;
     content: string;
 };
 
+const assureDirectory = (path: string) => {
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(dirname(path), { recursive: true });
+    }
+};
+
+const assureFile = (path: string) => {
+    assureDirectory(path);
+
+    if (!fs.existsSync(path)) {
+        fs.writeFileSync(path, "");
+    }
+};
+
 const writeFile = ({ content, path }: TemplateFileProps) => {
     try {
+        assureFile(path);
         fs.writeFileSync(path, content);
         return true;
     } catch (error) {
@@ -18,15 +34,20 @@ const writeFile = ({ content, path }: TemplateFileProps) => {
     }
 };
 
-const readFile = (path: string) => {
-    const content = fs.readFileSync(path, "utf8");
+const readFile = (path: string): Maybe<string> => {
+    try {
+        const content = fs.readFileSync(path, "utf8");
+        if (content === undefined) {
+            Logger.debug(`Could not read file ${path}`);
+            return undefined;
+        }
 
-    if (!content) {
+        return content;
+    } catch (error) {
         Logger.debug(`Could not read file ${path}`);
+        Logger.debug(error);
         return undefined;
     }
-
-    return content;
 };
 
 const createDirectory = (path: string) => {
@@ -138,6 +159,7 @@ const copyDirectory = (
 
 const appendToFile = (path: string, content: string) => {
     try {
+        assureFile(path);
         fs.appendFileSync(path, content);
         return true;
     } catch (error) {

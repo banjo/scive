@@ -42,7 +42,7 @@ const input = async ({
     return res ?? "";
 };
 
-const select = async ({
+const select = async <T extends string>({
     message,
     onError,
     options,
@@ -50,7 +50,7 @@ const select = async ({
     message: string;
     onError?: () => Promise<void> | void;
     options: { value: string; label: string; hint?: string }[];
-}): Promise<string> => {
+}): Promise<T> => {
     const res = await consola.prompt(message, { type: "select", options });
 
     if (isSymbol(res)) {
@@ -59,7 +59,27 @@ const select = async ({
         process.exit(1);
     }
 
-    return res as unknown as string; // bug with consola types, it returns a string
+    return res as unknown as T; // bug with consola types, it returns a string
+};
+
+const multiSelect = async <T extends string>({
+    message,
+    onError,
+    options,
+}: {
+    message: string;
+    onError?: () => Promise<void> | void;
+    options: { value: string; label: string; hint?: string }[];
+}): Promise<T[]> => {
+    const res = await consola.prompt(message, { type: "multiselect", options });
+
+    if (isSymbol(res)) {
+        if (onError) await onError();
+        Logger.error(`Could not prompt input ${message}`);
+        process.exit(1);
+    }
+
+    return res as unknown as T[]; // bug with consola types, it returns a string
 };
 
 const confirm = async ({ message, defaultValue }: { message: string; defaultValue: boolean }) => {
@@ -73,9 +93,25 @@ const confirm = async ({ message, defaultValue }: { message: string; defaultValu
     return res;
 };
 
+const openDirectory = async (path: string) => {
+    await execute(`open ${path}`);
+};
+
+const openInEditor = async (
+    path: string,
+    config?: { waitForClose: boolean; newWindow: boolean }
+) => {
+    const { waitForClose = true, newWindow = false } = config ?? {};
+    Logger.log(`Opening ${path} in editor${waitForClose ? ", waiting for close" : ""}`);
+    await execute(`code ${waitForClose ? "--wait" : ""} ${newWindow ? "-n" : ""} ${path}`);
+};
+
 export const CliService = {
     execute,
     input,
     select,
     confirm,
+    openDirectory,
+    openInEditor,
+    multiSelect,
 };

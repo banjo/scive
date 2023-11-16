@@ -3,7 +3,7 @@ import { Logger } from "@/logger";
 import { setDebug } from "@/runtime";
 import { CliService } from "@/services/cli-service";
 import { SciveService } from "@/services/scive-service";
-import { standout } from "@/utils/cli-util";
+import { heading, standout } from "@/utils/cli-util";
 import { capitalize } from "@banjoanton/utils";
 import { defineCommand } from "citty";
 import { version } from "../package.json";
@@ -48,6 +48,8 @@ export const main = defineCommand({
     },
     run: async ctx => {
         Logger.debug("Running main command");
+
+        Logger.log(heading(`Scive ${version}`));
 
         const commandName = await CliService.select({
             message: "What action do you want to take?",

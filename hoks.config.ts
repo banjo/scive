@@ -3,7 +3,7 @@ import { defineConfig } from "hoks";
 export default defineConfig({
     installOnLockChange: true,
     staged: {
-        "*": ["prettier --write --ignore-unknown", "eslint --fix"],
+        "*": ["eslint --fix", "prettier --write --ignore-unknown"],
     },
     syncBeforePush: true,
     enforceConventionalCommits: true,

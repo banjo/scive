@@ -2,8 +2,10 @@ import { FOLDER_DIRECTORY, SCIVE_JSON_DIRECTORY, TEMPLATES_DIRECTORY } from "@/c
 import { Logger } from "@/logger";
 import { Config } from "@/models/config-model";
 import { Template } from "@/models/template-model";
+import { CliService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { TemplateService } from "@/services/template-service";
+import { newline, standout } from "@/utils/cli-util";
 import { isEmpty, tryOrDefault } from "@banjoanton/utils";
 
 export const init = () => {
@@ -63,12 +65,37 @@ const updateConfig = (config: Config) => {
 const addTemplateConfig = (template: Template) => {
     const config = loadConfig();
     config.templates.push(template);
+    Logger.debug(`Adding template config for ${template.name}`);
+    updateConfig(config);
+};
+
+const updateTemplateConfig = (template: Template) => {
+    const config = loadConfig();
+    const templateIndex = config.templates.findIndex(t => t.id === template.id);
+
+    if (templateIndex === -1) {
+        Logger.error(`Could not find template with id ${template.id}`);
+        process.exit(1);
+    }
+
+    config.templates[templateIndex] = template;
+    Logger.debug(`Updating template config for ${template.name}`);
     updateConfig(config);
 };
 
 const getTemplates = () => {
     const config = loadConfig();
     return config.templates;
+};
+
+const removeTemplate = (template: Template) => {
+    const config = loadConfig();
+    config.templates = config.templates.filter(t => t.id !== template.id);
+    updateConfig(config);
+
+    Logger.debug(`Removing template ${template.name}`);
+
+    FileService.removeDirectory(`${TEMPLATES_DIRECTORY}/${template.id}`);
 };
 
 /**
@@ -121,12 +148,53 @@ const handleUnsyncedTemplates = () => {
     }
 };
 
+type TemplateFile = { content: string; name: string; variables: string[] };
+const createTemplateFile = async (id: string): Promise<TemplateFile> => {
+    const fileName = await CliService.input({
+        message: `Template file name with extension`,
+        required: true,
+    });
+
+    const nameWithHbs = fileName.endsWith(".hbs") ? fileName : `${fileName}.hbs`;
+    const newPath = `${TEMPLATES_DIRECTORY}/${id}/${nameWithHbs}`;
+
+    const fileExists = FileService.checkIfExists(newPath);
+
+    if (fileExists) {
+        Logger.error(`Template ${standout(nameWithHbs)} already exists`);
+        process.exit(1);
+    }
+
+    newline();
+    await CliService.openInEditor(newPath);
+    const fileContent = FileService.readFile(newPath);
+
+    if (!fileContent) {
+        Logger.error(`Could not read file ${newPath}`);
+        process.exit(1);
+    }
+
+    const addedVariables = [
+        ...TemplateService.parseTemplateVariableNames(fileContent),
+        ...TemplateService.parseTemplateVariableNames(nameWithHbs),
+    ];
+
+    return {
+        content: fileContent,
+        name: nameWithHbs,
+        variables: addedVariables,
+    };
+};
+
 export const SciveService = {
     init,
     hasInitiated,
     loadConfig,
     updateConfig,
     addTemplateConfig,
+    updateTemplateConfig,
     handleUnsyncedTemplates,
     getTemplates,
+    removeTemplate,
+    createTemplateFile,
 };

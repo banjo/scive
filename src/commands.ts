@@ -15,8 +15,8 @@ export const commandAction: CommandMap = {
         await TemplateService.createTemplate();
         process.exit(0);
     },
-    list: () => {
-        TemplateService.listTemplates();
+    list: async () => {
+        await TemplateService.listTemplates();
         process.exit(0);
     },
 };
@@ -24,5 +24,5 @@ export const commandAction: CommandMap = {
 export const commandDescription: Record<Command, string> = {
     run: "Create new files from a template",
     create: "Create a new template through a wizard",
-    list: "List all local templates",
+    list: "List and configure templates",
 };

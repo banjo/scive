@@ -1,11 +1,12 @@
 import { TEMPLATES_DIRECTORY } from "@/constants";
 import { Logger } from "@/logger";
+import { getTemplateAction } from "@/models/template-actions-model";
 import { Template } from "@/models/template-model";
 import { CliService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
-import { dim, highlight, newline, standout } from "@/utils/cli-util";
+import { clear, heading, highlight, newline, standout } from "@/utils/cli-util";
 import { isUUID, uniq, uuid } from "@banjoanton/utils";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
@@ -87,50 +88,17 @@ const getTemplateInfoFromContent = (folderName: string) => {
 };
 
 const createTemplateFromWizard = async (id: string) => {
-    const files: { content: string; name: string }[] = [];
+    const files: { content: string; name: string; variables: string[] }[] = []; // TODO: get type from createTemplateFile
     let continueAddingFiles = true;
 
     while (continueAddingFiles) {
-        const fileName = await CliService.input({
-            message: `Template file name with extension`,
-            required: true,
-        });
-
-        const nameWithHbs = fileName.endsWith(".hbs") ? fileName : `${fileName}.hbs`;
-        const newPath = `${TEMPLATES_DIRECTORY}/${id}/${nameWithHbs}`;
-
-        const fileExists = FileService.checkIfExists(newPath);
-
-        if (fileExists) {
-            Logger.error(`Template ${standout(nameWithHbs)} already exists`);
-            process.exit(1);
-        }
-
-        newline();
-        Logger.info(
-            `Create the template file using ${standout("handlebars")}, save and close when ready`
-        );
-        await CliService.execute(`code --wait ${newPath}`);
-        const fileContent = FileService.readFile(newPath);
-
-        if (!fileContent) {
-            Logger.error(`Could not read file ${newPath}`);
-            process.exit(1);
-        }
-
-        files.push({ content: fileContent, name: nameWithHbs });
-
+        const file = await SciveService.createTemplateFile(id);
+        files.push(file);
         continueAddingFiles = await CliService.confirm({
             message: `Add another file?`,
             defaultValue: false,
         });
     }
-
-    const addedVariables = files.reduce((acc, file) => {
-        const fileVariables = parseTemplateVariableNames(file.content);
-        const nameVariables = parseTemplateVariableNames(file.name);
-        return [...acc, ...fileVariables, ...nameVariables];
-    }, [] as string[]);
 
     const onError = () => {
         Logger.error(`Could not get prompt`);
@@ -138,10 +106,12 @@ const createTemplateFromWizard = async (id: string) => {
         FileService.removeDirectory(newPath);
     };
 
-    const name = await PromptService.templateName(onError);
-    const description = await PromptService.templateDescription(onError);
-    const tags = await PromptService.templateTags(onError);
-    const variables = await PromptService.templateVariables(addedVariables, onError);
+    const allVariables = files.reduce((acc, file) => [...acc, ...file.variables], [] as string[]);
+
+    const name = await PromptService.templateName({ onError });
+    const description = await PromptService.templateDescription({ onError });
+    const tags = await PromptService.templateTags({ onError });
+    const variables = await PromptService.templateVariables(allVariables, onError);
 
     const template = Template.from({
         id,
@@ -171,9 +141,9 @@ const createTemplateFromFolder = async (id: string) => {
         FileService.removeDirectory(newPath);
     };
 
-    const name = await PromptService.templateName(onError);
-    const description = await PromptService.templateDescription(onError);
-    const tags = await PromptService.templateTags(onError);
+    const name = await PromptService.templateName({ onError });
+    const description = await PromptService.templateDescription({ onError });
+    const tags = await PromptService.templateTags({ onError });
 
     const variables = getVariablesFromFiles(files, newPath);
     const templateVariables = await PromptService.templateVariables(variables, onError);
@@ -272,7 +242,8 @@ const runTemplate = async () => {
     Logger.success(`Created ${template.name}`);
 };
 
-const listTemplates = () => {
+const listTemplates = async () => {
+    clear();
     const templates = SciveService.getTemplates();
 
     if (templates.length === 0) {
@@ -281,9 +252,27 @@ const listTemplates = () => {
     }
 
     newline();
-    Logger.log("Templates");
-    for (const template of templates) {
-        Logger.log(`👉 ${standout(template.name)} - ${dim(template.description)}`);
+    Logger.log(heading("Templates"));
+    const template = await CliService.select({
+        message: "Select template to modify",
+        options: templates.map(t => ({
+            value: t.name,
+            label: t.name,
+            hint: t.description,
+        })),
+    });
+
+    while (true) {
+        const updatedTemplates = SciveService.getTemplates();
+        const selectedTemplate = updatedTemplates.find(t => t.name === template);
+
+        if (!selectedTemplate) {
+            Logger.error(`Template ${standout(template)} not found`);
+            process.exit(1);
+        }
+        const templateOptions = await PromptService.templateAction();
+        const action = getTemplateAction(templateOptions);
+        await action(selectedTemplate);
     }
 };
 

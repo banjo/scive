@@ -45,7 +45,7 @@ const templateActions: Record<
         process.exit(0);
     },
     edit: async (template: Template) => {
-        await CliService.openInEditor(`${TEMPLATES_DIRECTORY}/${template.id}`, {
+        await CliService.openFolderInEditor(`${TEMPLATES_DIRECTORY}/${template.id}`, {
             waitForClose: false,
             newWindow: true,
         });

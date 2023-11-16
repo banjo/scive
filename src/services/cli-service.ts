@@ -1,7 +1,8 @@
 import { Logger } from "@/logger";
+import { FileService } from "@/services/file-service";
 import { Callback, isSymbol, tryOrDefaultAsync } from "@banjoanton/utils";
 import consola from "consola";
-import { Options, execa } from "execa";
+import { execa, Options } from "execa";
 
 const execute = async (command: string, opt?: Options) => {
     const args = command.split(" ");
@@ -116,10 +117,34 @@ const openInEditor = async (
 ) => {
     const { waitForClose = true, newWindow = false } = config ?? {};
 
+    const fileExists = FileService.checkIfExists(path);
+
+    if (!fileExists) {
+        Logger.debug(`File ${path} does not exist, creating empty file`);
+        FileService.writeFile({ path, content: "" });
+    }
+
     const isInstalled = await isCodeInstalled();
 
     if (!isInstalled) {
         Logger.warning("Must have VSCode installed to open in editor");
+        return;
+    }
+
+    Logger.log(`Opening ${path} in editor${waitForClose ? ", waiting for close" : ""}`);
+    await execute(`code ${waitForClose ? "--wait" : ""} ${newWindow ? "-n" : ""} ${path}`);
+};
+
+const openFolderInEditor = async (
+    path: string,
+    config?: { waitForClose: boolean; newWindow: boolean }
+) => {
+    const { waitForClose = true, newWindow = false } = config ?? {};
+
+    const isInstalled = await isCodeInstalled();
+
+    if (!isInstalled) {
+        Logger.warning("Must have VSCode installed to open folder in editor");
         return;
     }
 
@@ -135,4 +160,5 @@ export const CliService = {
     openDirectory,
     openInEditor,
     multiSelect,
+    openFolderInEditor,
 };

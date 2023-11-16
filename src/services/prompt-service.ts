@@ -1,3 +1,4 @@
+import { Logger } from "@/logger";
 import { getSettingDescription, Setting, SETTINGS } from "@/models/settings-model";
 import {
     getTemplateActionDescription,
@@ -15,6 +16,11 @@ const directory = async () => {
         gitignore: true,
         cwd: process.cwd(),
     });
+
+    if (subdirectories.length === 0) {
+        Logger.debug("No subdirectories found, using current directory");
+        return ".";
+    }
 
     const dir = await CliService.select({
         message: "Select directory",

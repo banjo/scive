@@ -40,6 +40,7 @@ const templateActions: Record<
 > = {
     open: async (template: Template) => {
         await CliService.openDirectory(`${TEMPLATES_DIRECTORY}/${template.id}`);
+        Logger.success(`Successfully opened template ${template.name}`);
         process.exit(0);
     },
     edit: async (template: Template) => {
@@ -47,12 +48,17 @@ const templateActions: Record<
             waitForClose: false,
             newWindow: true,
         });
+
+        Logger.success(`Successfully saved template ${template.name}`);
+
         process.exit(0);
     },
     rename: async (template: Template) => {
         const newName = await PromptService.templateName({ defaultValue: template.name });
         const updatedTemplate = Template.from({ ...template, name: newName });
         SciveService.updateTemplateConfig(updatedTemplate);
+
+        Logger.success(`Updated name for template ${template.name}`);
     },
     description: async (template: Template) => {
         const newDescription = await PromptService.templateDescription({
@@ -60,6 +66,8 @@ const templateActions: Record<
         });
         const updatedTemplate = Template.from({ ...template, description: newDescription });
         SciveService.updateTemplateConfig(updatedTemplate);
+
+        Logger.success(`Updated description for template ${template.name}`);
     },
     add: async (template: Template) => {
         const newFile = await SciveService.createTemplateFile(template.id);
@@ -69,6 +77,8 @@ const templateActions: Record<
             variables: [...template.variables, ...newFile.variables],
         });
         SciveService.updateTemplateConfig(updatedTemplate);
+
+        Logger.success(`Added file ${newFile.name} to template ${template.name}`);
     },
     remove: async (template: Template) => {
         const filesToRemove = await CliService.multiSelect({
@@ -90,11 +100,14 @@ const templateActions: Record<
             Logger.debug(`Removing file ${file}`);
             FileService.removeFile(`${TEMPLATES_DIRECTORY}/${template.id}/${file}`);
         }
+
+        Logger.success(`Removed ${filesToRemove.length} files from template ${template.name}`);
     },
     tags: async (template: Template) => {
         const newTags = await PromptService.templateTags({ defaultValue: template.tags.join(",") });
         const updatedTemplate = Template.from({ ...template, tags: newTags.split(",") });
         SciveService.updateTemplateConfig(updatedTemplate);
+        Logger.success(`Updated tags for template ${template.name}`);
     },
     delete: (template: Template) => {
         const shouldDelete = CliService.confirm({
@@ -109,6 +122,7 @@ const templateActions: Record<
 
         Logger.debug(`Removing template ${template.name}`);
         SciveService.removeTemplate(template);
+        Logger.success(`Removed template ${template.name}`);
         process.exit(0);
     },
 };

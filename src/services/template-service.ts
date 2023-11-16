@@ -6,7 +6,7 @@ import { CliService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
-import { clear, heading, highlight, newline, standout } from "@/utils/cli-util";
+import { clear, heading, highlight, newline, showHeader, standout } from "@/utils/cli-util";
 import { isUUID, uniq, uuid } from "@banjoanton/utils";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
@@ -88,8 +88,10 @@ const getTemplateInfoFromContent = (folderName: string) => {
 };
 
 const createTemplateFromWizard = async (id: string) => {
-    const files: { content: string; name: string; variables: string[] }[] = []; // TODO: get type from createTemplateFile
+    const files = [];
     let continueAddingFiles = true;
+
+    showHeader("Template wizard");
 
     while (continueAddingFiles) {
         const file = await SciveService.createTemplateFile(id);
@@ -128,6 +130,7 @@ const createTemplateFromWizard = async (id: string) => {
 };
 
 const createTemplateFromFolder = async (id: string) => {
+    showHeader("Template from folder");
     const directory = await PromptService.directory();
 
     const newPath = `${TEMPLATES_DIRECTORY}/${id}`;
@@ -162,8 +165,8 @@ const createTemplateFromFolder = async (id: string) => {
 };
 
 const createTemplate = async () => {
-    Logger.log("Create template");
     const id = uuid();
+    showHeader("Create");
 
     const creationStyle = await CliService.select({
         message: "Select creation style",
@@ -242,34 +245,50 @@ const runTemplate = async () => {
     Logger.success(`Created ${template.name}`);
 };
 
-const listTemplates = async () => {
+const listTemplates = async (name?: string) => {
     clear();
     const templates = SciveService.getTemplates();
+    showHeader("Templates");
 
     if (templates.length === 0) {
         Logger.warning("No templates found");
         process.exit(0);
     }
 
+    let template = name ? templates.find(t => t.name === name)?.name : undefined;
+    if (!template) {
+        // eslint-disable-next-line require-atomic-updates
+        template = await CliService.select({
+            message: "Select template to modify",
+            options: templates.map(t => ({
+                value: t.name,
+                label: t.name,
+                hint: t.description,
+            })),
+        });
+    }
+
+    const templateId = templates.find(t => t.name === template)?.id;
+
+    if (!templateId) {
+        Logger.error(`Template id for ${standout(template)} not found`);
+        process.exit(1);
+    }
+
     newline();
-    Logger.log(heading("Templates"));
-    const template = await CliService.select({
-        message: "Select template to modify",
-        options: templates.map(t => ({
-            value: t.name,
-            label: t.name,
-            hint: t.description,
-        })),
-    });
 
     while (true) {
         const updatedTemplates = SciveService.getTemplates();
-        const selectedTemplate = updatedTemplates.find(t => t.name === template);
+        const selectedTemplate = updatedTemplates.find(t => t.id === templateId);
 
         if (!selectedTemplate) {
             Logger.error(`Template ${standout(template)} not found`);
             process.exit(1);
         }
+
+        clear();
+        Logger.log(heading(`Template ${template}`));
+
         const templateOptions = await PromptService.templateAction();
         const action = getTemplateAction(templateOptions);
         await action(selectedTemplate);

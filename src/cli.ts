@@ -1,11 +1,14 @@
-import { Command, commandAction, commandDescription, COMMANDS } from "@/commands";
+import { Command, COMMANDS, getCommandDescription } from "@/commands";
+import { create } from "@/commands/create";
+import { list } from "@/commands/list";
+import { run } from "@/commands/run";
 import { Logger } from "@/logger";
 import { setDebug } from "@/runtime";
 import { CliService } from "@/services/cli-service";
 import { SciveService } from "@/services/scive-service";
-import { heading, standout } from "@/utils/cli-util";
+import { showHeader, standout } from "@/utils/cli-util";
 import { capitalize } from "@banjoanton/utils";
-import { defineCommand } from "citty";
+import { defineCommand, runCommand } from "citty";
 import { version } from "../package.json";
 
 export const main = defineCommand({
@@ -24,9 +27,9 @@ export const main = defineCommand({
         },
     },
     subCommands: {
-        run: () => import("@/commands/run").then(m => m.runCommand),
-        create: () => import("@/commands/create").then(m => m.createCommand),
-        list: () => import("@/commands/list").then(m => m.listCommand),
+        run,
+        create,
+        list,
     },
     setup: ctx => {
         const config = SciveService.loadConfig();
@@ -48,20 +51,32 @@ export const main = defineCommand({
     },
     run: async ctx => {
         Logger.debug("Running main command");
+        showHeader(`Scive ${version}`);
 
-        Logger.log(heading(`Scive ${version}`));
-
-        const commandName = await CliService.select({
+        const commandName = await CliService.select<Command>({
             message: "What action do you want to take?",
             options: COMMANDS.map(c => ({
                 label: capitalize(c),
                 value: c,
-                hint: commandDescription[c],
+                hint: getCommandDescription(c),
             })),
         });
 
         Logger.debug(`Selected command ${standout(commandName)}`);
-        const command = commandAction[commandName as Command];
-        await command();
+
+        switch (commandName) {
+            case "create": {
+                await runCommand(create, { rawArgs: [] });
+                break;
+            }
+            case "list": {
+                await runCommand(list, { rawArgs: [] });
+                break;
+            }
+            case "run": {
+                await runCommand(run, { rawArgs: [] });
+                break;
+            }
+        }
     },
 });

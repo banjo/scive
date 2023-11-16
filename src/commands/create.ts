@@ -1,13 +1,15 @@
-import { commandAction, commandDescription } from "@/commands";
+import { getCommandDescription } from "@/commands";
+import { TemplateService } from "@/services/template-service";
 import { defineCommand } from "citty";
 
-export const createCommand = defineCommand({
+export const create = defineCommand({
     meta: {
         name: "create",
-        description: commandDescription.create,
+        description: getCommandDescription("create"),
     },
     args: {},
     run: async () => {
-        await commandAction.create();
+        await TemplateService.createTemplate();
+        process.exit(0);
     },
 });

@@ -62,18 +62,6 @@ const removeFile = (path: string) => {
     }
 };
 
-const removeDirectory = (path: string) => {
-    try {
-        fs.rmdirSync(path);
-        return true;
-    } catch (error) {
-        Logger.error(`Could not remove directory ${path}`);
-        Logger.debug(error);
-
-        return false;
-    }
-};
-
 const readDirectory = (path: string, recursive = false) => {
     const files = tryOrDefault(() => fs.readdirSync(path, { recursive, encoding: "utf8" }));
 
@@ -83,6 +71,26 @@ const readDirectory = (path: string, recursive = false) => {
     }
 
     return files;
+};
+
+const removeDirectory = (path: string) => {
+    const files = readDirectory(path, true);
+
+    for (const file of files) {
+        Logger.debug(`Removing file ${file}`);
+        removeFile(`${path}/${file}`);
+    }
+
+    try {
+        Logger.debug(`Removing directory ${path}`);
+        fs.rmdirSync(path);
+        return true;
+    } catch (error) {
+        Logger.error(`Could not remove directory ${path}`);
+        Logger.debug(error);
+
+        return false;
+    }
 };
 
 const moveDirectory = (oldPath: string, newPath: string) => {

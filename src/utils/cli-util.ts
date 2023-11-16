@@ -1,3 +1,4 @@
+import { Logger } from "@/logger";
 import pc from "picocolors";
 
 export const standout = (message: string) => pc.cyan(message);
@@ -9,3 +10,12 @@ export const newline = () => console.log();
 export const heading = (message: string) => pc.bgCyan(` ${pc.black(message.toUpperCase())} `);
 // eslint-disable-next-line n/no-unsupported-features/node-builtins
 export const clear = () => console.clear();
+
+/**
+ * Clear console and show header
+ * @param text - Text to show in header
+ */
+export const showHeader = (text: string) => {
+    clear();
+    Logger.log(heading(text));
+};

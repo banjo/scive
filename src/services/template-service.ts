@@ -8,8 +8,9 @@ import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
 import { clear, highlight, newline, showHeader, standout } from "@/utils/cli-util";
-import { isUUID, uniq, uuid } from "@banjoanton/utils";
+import { isUUID, uniq } from "@banjoanton/utils";
 import Handlebars from "handlebars";
+import { randomUUID } from "node:crypto";
 import { UnknownRecord } from "type-fest";
 
 const parseTemplate = (template: string, data: UnknownRecord) => Handlebars.compile(template)(data);
@@ -39,7 +40,7 @@ const sanitizeFolder = (folderName: string) => {
         id = folderName;
         name = folderName;
     } else {
-        id = uuid();
+        id = randomUUID();
         name = folderName;
         FileService.moveDirectory(
             `${TEMPLATES_DIRECTORY}/${folderName}`,
@@ -109,7 +110,9 @@ const createTemplateFromWizard = async (id: string) => {
         FileService.removeDirectory(newPath);
     };
 
-    const allVariables = files.reduce((acc, file) => [...acc, ...file.variables], [] as string[]);
+    const allVariables = uniq(
+        files.reduce((acc, file) => [...acc, ...file.variables], [] as string[])
+    );
 
     const name = await PromptService.templateName({ onError });
     const description = await PromptService.templateDescription({ onError });
@@ -166,7 +169,7 @@ const createTemplateFromFolder = async (id: string) => {
 };
 
 const createTemplate = async () => {
-    const id = uuid();
+    const id = randomUUID();
     showHeader("Create");
 
     const creationStyle = await CliService.select({
@@ -221,6 +224,8 @@ const runTemplate = async () => {
         });
         templateData[variable] = value;
     }
+
+    console.log("hello");
 
     const directory = await PromptService.directory();
     const templateFiles = template.files;

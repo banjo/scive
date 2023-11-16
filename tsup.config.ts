@@ -7,6 +7,8 @@ export default defineConfig({
     clean: true,
     dts: true,
     format: ["esm"],
-    minify: true,
+    minify: false,
     target: "es2022",
+    platform: "node",
+    external: ["@banjoanton/utils"],
 });

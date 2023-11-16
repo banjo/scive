@@ -48,13 +48,14 @@
         "execa": "^8.0.1",
         "globby": "^14.0.0",
         "handlebars": "^4.7.8",
-        "picocolors": "^1.0.0"
+        "picocolors": "^1.0.0",
+        "uuid": "^9.0.1"
     },
     "devDependencies": {
         "@antfu/ni": "^0.21.9",
         "@banjoanton/eslint-config": "^0.1.15",
         "@banjoanton/prettier-config": "^0.1.10",
-        "@banjoanton/utils": "^0.1.60",
+        "@banjoanton/utils": "^0.1.61",
         "@types/debug": "^4.1.12",
         "@types/node": "^20.9.0",
         "bumpp": "^9.2.0",

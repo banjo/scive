@@ -225,8 +225,6 @@ const runTemplate = async () => {
         templateData[variable] = value;
     }
 
-    console.log("hello");
-
     const directory = await PromptService.directory();
     const templateFiles = template.files;
 

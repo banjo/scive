@@ -3,6 +3,7 @@ import { Logger } from "@/logger";
 import { getTemplateAction } from "@/models/template-actions-model";
 import { Template } from "@/models/template-model";
 import { CliService } from "@/services/cli-service";
+import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
@@ -124,7 +125,7 @@ const createTemplateFromWizard = async (id: string) => {
         variables: variables.split(","),
     });
 
-    SciveService.addTemplateConfig(template);
+    ConfigService.addTemplateConfig(template);
 
     Logger.success(`Created template ${highlight(name)}`);
 };
@@ -156,11 +157,11 @@ const createTemplateFromFolder = async (id: string) => {
         description,
         name,
         tags: tags.split(","),
-        variables: templateVariables.split(","),
+        variables: templateVariables === "" ? [] : templateVariables.split(",").map(v => v.trim()),
         files,
     });
 
-    SciveService.addTemplateConfig(template);
+    ConfigService.addTemplateConfig(template);
     Logger.success(`Created template ${highlight(name)}`);
 };
 
@@ -188,7 +189,7 @@ const createTemplate = async () => {
 };
 
 const runTemplate = async () => {
-    const templates = SciveService.getTemplates();
+    const templates = ConfigService.getTemplates();
 
     if (templates.length === 0) {
         Logger.error("No templates found, create one first");
@@ -247,7 +248,7 @@ const runTemplate = async () => {
 
 const listTemplates = async (name?: string) => {
     clear();
-    const templates = SciveService.getTemplates();
+    const templates = ConfigService.getTemplates();
     showHeader("Templates");
 
     if (templates.length === 0) {
@@ -278,7 +279,7 @@ const listTemplates = async (name?: string) => {
     newline();
 
     while (true) {
-        const updatedTemplates = SciveService.getTemplates();
+        const updatedTemplates = ConfigService.getTemplates();
         const selectedTemplate = updatedTemplates.find(t => t.id === templateId);
 
         if (!selectedTemplate) {

@@ -2,12 +2,14 @@ import { Command, COMMANDS, getCommandDescription } from "@/commands";
 import { create } from "@/commands/create";
 import { list } from "@/commands/list";
 import { run } from "@/commands/run";
+import { settings } from "@/commands/settings";
 import { Logger } from "@/logger";
 import { setDebug } from "@/runtime";
 import { CliService } from "@/services/cli-service";
+import { ConfigService } from "@/services/config-service";
 import { SciveService } from "@/services/scive-service";
 import { showHeader, standout } from "@/utils/cli-util";
-import { capitalize } from "@banjoanton/utils";
+import { capitalize, exhaustiveCheck } from "@banjoanton/utils";
 import { defineCommand, runCommand } from "citty";
 import { version } from "../package.json";
 
@@ -30,9 +32,10 @@ export const main = defineCommand({
         run,
         create,
         list,
+        settings,
     },
     setup: ctx => {
-        const config = SciveService.loadConfig();
+        const config = ConfigService.loadConfig();
 
         if (ctx.args.debug || config.debug) {
             setDebug(true);
@@ -76,6 +79,13 @@ export const main = defineCommand({
             case "run": {
                 await runCommand(run, { rawArgs: [] });
                 break;
+            }
+            case "settings": {
+                await runCommand(settings, { rawArgs: [] });
+                break;
+            }
+            default: {
+                exhaustiveCheck(commandName);
             }
         }
     },

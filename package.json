@@ -54,7 +54,7 @@
         "@antfu/ni": "^0.21.9",
         "@banjoanton/eslint-config": "^0.1.15",
         "@banjoanton/prettier-config": "^0.1.10",
-        "@banjoanton/utils": "^0.1.59",
+        "@banjoanton/utils": "^0.1.60",
         "@types/debug": "^4.1.12",
         "@types/node": "^20.9.0",
         "bumpp": "^9.2.0",

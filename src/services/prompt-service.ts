@@ -1,3 +1,4 @@
+import { getSettingDescription, Setting, SETTINGS } from "@/models/settings-model";
 import {
     getTemplateActionDescription,
     TEMPLATE_ACTIONS,
@@ -85,6 +86,16 @@ const templateAction = async (onError?: Callback): Promise<TemplateAction> =>
         onError,
     });
 
+const settingsAction = async () =>
+    await CliService.select<Setting>({
+        message: "What do you want to do?",
+        options: SETTINGS.map(setting => ({
+            value: setting,
+            label: capitalize(setting),
+            hint: getSettingDescription(setting),
+        })),
+    });
+
 export const PromptService = {
     directory,
     templateName,
@@ -92,4 +103,5 @@ export const PromptService = {
     templateTags,
     templateVariables,
     templateAction,
+    settingsAction,
 };

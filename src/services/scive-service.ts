@@ -3,6 +3,7 @@ import { Logger } from "@/logger";
 import { Config } from "@/models/config-model";
 import { Template } from "@/models/template-model";
 import { CliService } from "@/services/cli-service";
+import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
 import { TemplateService } from "@/services/template-service";
 import { newline, standout } from "@/utils/cli-util";
@@ -34,64 +35,10 @@ export const init = () => {
 
 const hasInitiated = () => FileService.checkIfExists(SCIVE_JSON_DIRECTORY);
 
-const loadConfig = () => {
-    Logger.debug(`Loading config from ${SCIVE_JSON_DIRECTORY}`);
-    const config = tryOrDefault(() => {
-        const json = FileService.readFile(SCIVE_JSON_DIRECTORY);
-
-        if (!json) {
-            return undefined;
-        }
-
-        return Config.fromJSON(json);
-    });
-
-    if (!config) {
-        Logger.debug(`Could not load config from ${SCIVE_JSON_DIRECTORY}, using default config`);
-        return Config.default;
-    }
-
-    return config;
-};
-
-const updateConfig = (config: Config) => {
-    Logger.debug(`Updating config in ${SCIVE_JSON_DIRECTORY}`);
-    FileService.writeFile({
-        path: SCIVE_JSON_DIRECTORY,
-        content: Config.toJSON(config),
-    });
-};
-
-const addTemplateConfig = (template: Template) => {
-    const config = loadConfig();
-    config.templates.push(template);
-    Logger.debug(`Adding template config for ${template.name}`);
-    updateConfig(config);
-};
-
-const updateTemplateConfig = (template: Template) => {
-    const config = loadConfig();
-    const templateIndex = config.templates.findIndex(t => t.id === template.id);
-
-    if (templateIndex === -1) {
-        Logger.error(`Could not find template with id ${template.id}`);
-        process.exit(1);
-    }
-
-    config.templates[templateIndex] = template;
-    Logger.debug(`Updating template config for ${template.name}`);
-    updateConfig(config);
-};
-
-const getTemplates = () => {
-    const config = loadConfig();
-    return config.templates;
-};
-
 const removeTemplate = (template: Template) => {
-    const config = loadConfig();
+    const config = ConfigService.loadConfig();
     config.templates = config.templates.filter(t => t.id !== template.id);
-    updateConfig(config);
+    ConfigService.updateConfig(config);
 
     Logger.debug(`Removing template ${template.name}`);
 
@@ -103,7 +50,7 @@ const removeTemplate = (template: Template) => {
  * Adds basic config for template files without a corresponding config.
  */
 const handleUnsyncedTemplates = () => {
-    const config = loadConfig();
+    const config = ConfigService.loadConfig();
     const configTemplates = config.templates;
 
     const templateFiles = FileService.readDirectory(TEMPLATES_DIRECTORY);
@@ -132,7 +79,7 @@ const handleUnsyncedTemplates = () => {
             const templateConfig = TemplateService.getTemplateInfoFromContent(templateFile);
             config.templates.push(templateConfig);
         }
-        updateConfig(config);
+        ConfigService.updateConfig(config);
     }
 
     if (!isEmpty(templateConfigsToRemove)) {
@@ -144,7 +91,7 @@ const handleUnsyncedTemplates = () => {
         config.templates = configTemplates.filter(
             templateConfig => !templateConfigsToRemove.includes(templateConfig)
         );
-        updateConfig(config);
+        ConfigService.updateConfig(config);
     }
 };
 
@@ -189,12 +136,7 @@ const createTemplateFile = async (id: string): Promise<TemplateFile> => {
 export const SciveService = {
     init,
     hasInitiated,
-    loadConfig,
-    updateConfig,
-    addTemplateConfig,
-    updateTemplateConfig,
     handleUnsyncedTemplates,
-    getTemplates,
     removeTemplate,
     createTemplateFile,
 };

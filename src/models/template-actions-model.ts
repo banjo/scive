@@ -2,6 +2,7 @@ import { TEMPLATES_DIRECTORY } from "@/constants";
 import { Logger } from "@/logger";
 import { Template } from "@/models/template-model";
 import { CliService } from "@/services/cli-service";
+import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
@@ -56,7 +57,7 @@ const templateActions: Record<
     rename: async (template: Template) => {
         const newName = await PromptService.templateName({ defaultValue: template.name });
         const updatedTemplate = Template.from({ ...template, name: newName });
-        SciveService.updateTemplateConfig(updatedTemplate);
+        ConfigService.updateTemplateConfig(updatedTemplate);
 
         Logger.success(`Updated name for template ${template.name}`);
     },
@@ -65,7 +66,7 @@ const templateActions: Record<
             defaultValue: template.description,
         });
         const updatedTemplate = Template.from({ ...template, description: newDescription });
-        SciveService.updateTemplateConfig(updatedTemplate);
+        ConfigService.updateTemplateConfig(updatedTemplate);
 
         Logger.success(`Updated description for template ${template.name}`);
     },
@@ -76,7 +77,7 @@ const templateActions: Record<
             files: [...template.files, newFile.name],
             variables: [...template.variables, ...newFile.variables],
         });
-        SciveService.updateTemplateConfig(updatedTemplate);
+        ConfigService.updateTemplateConfig(updatedTemplate);
 
         Logger.success(`Added file ${newFile.name} to template ${template.name}`);
     },
@@ -94,7 +95,7 @@ const templateActions: Record<
             files: template.files.filter(file => !filesToRemove.includes(file)),
         });
 
-        SciveService.updateTemplateConfig(updatedTemplate);
+        ConfigService.updateTemplateConfig(updatedTemplate);
 
         for (const file of filesToRemove) {
             Logger.debug(`Removing file ${file}`);
@@ -106,7 +107,7 @@ const templateActions: Record<
     tags: async (template: Template) => {
         const newTags = await PromptService.templateTags({ defaultValue: template.tags.join(",") });
         const updatedTemplate = Template.from({ ...template, tags: newTags.split(",") });
-        SciveService.updateTemplateConfig(updatedTemplate);
+        ConfigService.updateTemplateConfig(updatedTemplate);
         Logger.success(`Updated tags for template ${template.name}`);
     },
     delete: (template: Template) => {

@@ -10,5 +10,4 @@ export default defineConfig({
     minify: false,
     target: "es2022",
     platform: "node",
-    external: ["@banjoanton/utils"],
 });

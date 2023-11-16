@@ -136,6 +136,17 @@ const copyDirectory = (
     }
 };
 
+const appendToFile = (path: string, content: string) => {
+    try {
+        fs.appendFileSync(path, content);
+        return true;
+    } catch (error) {
+        Logger.error(`Could not append to file ${path}`);
+        Logger.debug(error);
+        return false;
+    }
+};
+
 export const FileService = {
     writeFile,
     readFile,
@@ -147,4 +158,5 @@ export const FileService = {
     moveDirectory,
     copyDirectory,
     copyFile,
+    appendToFile,
 };

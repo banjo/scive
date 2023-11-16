@@ -7,7 +7,7 @@ import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
-import { clear, heading, highlight, newline, showHeader, standout } from "@/utils/cli-util";
+import { clear, highlight, newline, showHeader, standout } from "@/utils/cli-util";
 import { isUUID, uniq, uuid } from "@banjoanton/utils";
 import Handlebars from "handlebars";
 import { UnknownRecord } from "type-fest";
@@ -287,8 +287,7 @@ const listTemplates = async (name?: string) => {
             process.exit(1);
         }
 
-        clear();
-        Logger.log(heading(`Template ${template}`));
+        showHeader(`Template ${template}`);
 
         const templateOptions = await PromptService.templateAction();
         const action = getTemplateAction(templateOptions);

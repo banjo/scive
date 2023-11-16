@@ -1,17 +1,17 @@
 {
-    "name": "scafkit",
+    "name": "scive",
     "type": "module",
     "version": "0.0.1",
     "private": false,
     "description": "",
     "author": "Anton Ödman <anton.odman@gmail.com>",
     "license": "MIT",
-    "homepage": "https://github.com/banjo/scafkit#readme",
+    "homepage": "https://github.com/banjo/scive#readme",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/banjo/scafkit.git"
+        "url": "git+https://github.com/banjo/scive.git"
     },
-    "bugs": "https://github.com/banjo/scafkit/issues",
+    "bugs": "https://github.com/banjo/scive/issues",
     "keywords": [],
     "sideEffects": false,
     "main": "dist/index.js",

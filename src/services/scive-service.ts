@@ -1,4 +1,4 @@
-import { FOLDER_DIRECTORY, SCAFKIT_JSON_DIRECTORY, TEMPLATES_DIRECTORY } from "@/constants";
+import { FOLDER_DIRECTORY, SCIVE_JSON_DIRECTORY, TEMPLATES_DIRECTORY } from "@/constants";
 import { Logger } from "@/logger";
 import { Config } from "@/models/config-model";
 import { Template } from "@/models/template-model";
@@ -13,12 +13,12 @@ export const init = () => {
         FileService.createDirectory(FOLDER_DIRECTORY);
     }
 
-    const fileExists = tryOrDefault(() => FileService.readFile(SCAFKIT_JSON_DIRECTORY));
+    const fileExists = tryOrDefault(() => FileService.readFile(SCIVE_JSON_DIRECTORY));
 
     if (!fileExists) {
-        Logger.debug(`Creating: ${SCAFKIT_JSON_DIRECTORY}`);
+        Logger.debug(`Creating: ${SCIVE_JSON_DIRECTORY}`);
         FileService.writeFile({
-            path: SCAFKIT_JSON_DIRECTORY,
+            path: SCIVE_JSON_DIRECTORY,
             content: Config.toJSON(Config.default),
         });
     }
@@ -30,12 +30,12 @@ export const init = () => {
     }
 };
 
-const hasInitiated = () => FileService.checkIfExists(SCAFKIT_JSON_DIRECTORY);
+const hasInitiated = () => FileService.checkIfExists(SCIVE_JSON_DIRECTORY);
 
 const loadConfig = () => {
-    Logger.debug(`Loading config from ${SCAFKIT_JSON_DIRECTORY}`);
+    Logger.debug(`Loading config from ${SCIVE_JSON_DIRECTORY}`);
     const config = tryOrDefault(() => {
-        const json = FileService.readFile(SCAFKIT_JSON_DIRECTORY);
+        const json = FileService.readFile(SCIVE_JSON_DIRECTORY);
 
         if (!json) {
             return undefined;
@@ -45,7 +45,7 @@ const loadConfig = () => {
     });
 
     if (!config) {
-        Logger.debug(`Could not load config from ${SCAFKIT_JSON_DIRECTORY}, using default config`);
+        Logger.debug(`Could not load config from ${SCIVE_JSON_DIRECTORY}, using default config`);
         return Config.default;
     }
 
@@ -53,9 +53,9 @@ const loadConfig = () => {
 };
 
 const updateConfig = (config: Config) => {
-    Logger.debug(`Updating config in ${SCAFKIT_JSON_DIRECTORY}`);
+    Logger.debug(`Updating config in ${SCIVE_JSON_DIRECTORY}`);
     FileService.writeFile({
-        path: SCAFKIT_JSON_DIRECTORY,
+        path: SCIVE_JSON_DIRECTORY,
         content: Config.toJSON(config),
     });
 };
@@ -121,7 +121,7 @@ const handleUnsyncedTemplates = () => {
     }
 };
 
-export const ScafkitService = {
+export const SciveService = {
     init,
     hasInitiated,
     loadConfig,

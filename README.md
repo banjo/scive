@@ -1,21 +1,21 @@
-# scafkit
+# scive
 
-[![NPM version](https://img.shields.io/npm/v/scafkit?color=%23c53635&label=%20)](https://www.npmjs.com/package/scafkit)
+[![NPM version](https://img.shields.io/npm/v/scive?color=%23c53635&label=%20)](https://www.npmjs.com/package/scive)
 
 A simple CLI application template.
 
 ## Install
 
 ```bash
-npm install scafkit -g
+npm install scive -g
 ```
 
 ## Usage
 
 ```bash
 # run
-scafkit
+scive
 
 # run subcommand
-scafkit subcommand <name>
+scive subcommand <name>
 ```

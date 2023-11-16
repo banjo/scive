@@ -23,14 +23,14 @@ const directory = async () => {
 
 const templateName = async (onError?: Callback) =>
     await CliService.input({
-        message: `Template name ${standout("[for scafkit use]")}`,
+        message: `Template name ${standout("[for scive use]")}`,
         onError,
         required: true,
     });
 
 const templateDescription = async (onError?: Callback) =>
     await CliService.input({
-        message: `Template description ${standout("[for scafkit use]")}`,
+        message: `Template description ${standout("[for scive use]")}`,
         onError,
         required: true,
     });

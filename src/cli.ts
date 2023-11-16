@@ -2,7 +2,7 @@ import { Command, commandAction, commandDescription, COMMANDS } from "@/commands
 import { Logger } from "@/logger";
 import { setDebug } from "@/runtime";
 import { CliService } from "@/services/cli-service";
-import { ScafkitService } from "@/services/scafkit-service";
+import { SciveService } from "@/services/scive-service";
 import { standout } from "@/utils/cli-util";
 import { capitalize } from "@banjoanton/utils";
 import { defineCommand } from "citty";
@@ -10,7 +10,7 @@ import { version } from "../package.json";
 
 export const main = defineCommand({
     meta: {
-        name: "scafkit",
+        name: "scive",
         version,
         description: "Example CLI",
     },
@@ -29,22 +29,22 @@ export const main = defineCommand({
         list: () => import("@/commands/list").then(m => m.listCommand),
     },
     setup: ctx => {
-        const config = ScafkitService.loadConfig();
+        const config = SciveService.loadConfig();
 
         if (ctx.args.debug || config.debug) {
             setDebug(true);
             Logger.debug("Debug mode enabled");
         }
 
-        const isInitiated = ScafkitService.hasInitiated();
+        const isInitiated = SciveService.hasInitiated();
         if (isInitiated) {
-            Logger.debug("Scafkit already initiated");
+            Logger.debug("Scive already initiated");
         } else {
-            Logger.debug("Initializing scafkit");
-            ScafkitService.init();
+            Logger.debug("Initializing scive");
+            SciveService.init();
         }
 
-        ScafkitService.handleUnsyncedTemplates();
+        SciveService.handleUnsyncedTemplates();
     },
     run: async ctx => {
         Logger.debug("Running main command");

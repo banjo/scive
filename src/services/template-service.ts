@@ -4,7 +4,7 @@ import { Template } from "@/models/template-model";
 import { CliService } from "@/services/cli-service";
 import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
-import { ScafkitService } from "@/services/scafkit-service";
+import { SciveService } from "@/services/scive-service";
 import { dim, highlight, newline, standout } from "@/utils/cli-util";
 import { isUUID, uniq, uuid } from "@banjoanton/utils";
 import Handlebars from "handlebars";
@@ -75,7 +75,7 @@ const getTemplateInfoFromContent = (folderName: string) => {
     const templateVariables = getVariablesFromFiles(templateFiles, templateDirectory);
 
     const template = Template.from({
-        description: "Scafkit template",
+        description: "Scive template",
         id,
         name,
         tags: [],
@@ -152,7 +152,7 @@ const createTemplateFromWizard = async (id: string) => {
         variables: variables.split(","),
     });
 
-    ScafkitService.addTemplateConfig(template);
+    SciveService.addTemplateConfig(template);
 
     Logger.success(`Created template ${highlight(name)}`);
 };
@@ -187,7 +187,7 @@ const createTemplateFromFolder = async (id: string) => {
         files,
     });
 
-    ScafkitService.addTemplateConfig(template);
+    SciveService.addTemplateConfig(template);
     Logger.success(`Created template ${highlight(name)}`);
 };
 
@@ -215,7 +215,7 @@ const createTemplate = async () => {
 };
 
 const runTemplate = async () => {
-    const templates = ScafkitService.getTemplates();
+    const templates = SciveService.getTemplates();
 
     if (templates.length === 0) {
         Logger.error("No templates found, create one first");
@@ -273,7 +273,7 @@ const runTemplate = async () => {
 };
 
 const listTemplates = () => {
-    const templates = ScafkitService.getTemplates();
+    const templates = SciveService.getTemplates();
 
     if (templates.length === 0) {
         Logger.warning("No templates found");

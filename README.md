@@ -2,7 +2,7 @@
 
 Scaffold your projects effortlessly with custom templates.
 
-![Scive image](/.github/assets/scive.png)
+![Demo](/.github/assets/demo.gif)
 
 [![NPM version](https://img.shields.io/npm/v/scive?color=%2351A8DD&label=%20)](https://www.npmjs.com/package/scive)
 
@@ -10,7 +10,7 @@ Scaffold your projects effortlessly with custom templates.
 -   🔮 - Interactive CLI wizard to guide you through new template setup
 -   📑 - Manage multiple file templates with ease
 -   ⚡ - Instantly scaffold new files with a single command
--   🏋️ - Use `Handlebars` to add dynamic content to your templates
+-   🏋️ - Use `handlebars` to add dynamic content to your templates
 -   💾 - Local storage of templates for portability and reuse
 -   ✨ - Simplifies repetitive setup tasks and enhances productivity
 

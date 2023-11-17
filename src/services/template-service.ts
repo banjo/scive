@@ -168,11 +168,52 @@ const createTemplateFromFolder = async (id: string) => {
     Logger.success(`Created template ${highlight(name)}`);
 };
 
+const createTemplateFromFile = async (id: string) => {
+    showHeader("Template from file");
+    const file = await PromptService.file();
+
+    const newPath = `${TEMPLATES_DIRECTORY}/${id}`;
+    FileService.createDirectory(newPath);
+
+    const fileName = file.split("/").pop();
+    if (!isDefined(fileName)) {
+        Logger.error(`Could not get file name from ${file}`);
+        process.exit(1);
+    }
+
+    FileService.copyFile(file, `${newPath}/${fileName}.hbs`);
+
+    const onError = () => {
+        Logger.error(`Could not get prompt`);
+        FileService.removeDirectory(newPath);
+    };
+
+    const name = await PromptService.templateName({ onError });
+    const description = await PromptService.templateDescription({ onError });
+    const tags = await PromptService.templateTags({ onError });
+
+    const variables = parseTemplateVariableNames(fileName);
+    const templateVariables = await PromptService.templateVariables(variables, onError);
+
+    const template = Template.from({
+        id,
+        description,
+        name,
+        tags: tags.split(","),
+        variables: templateVariables === "" ? [] : templateVariables.split(",").map(v => v.trim()),
+        files: [fileName],
+    });
+
+    ConfigService.addTemplateConfig(template);
+    Logger.success(`Created template ${highlight(name)}`);
+};
+
+type CreationType = "wizard" | "folder" | "file";
 const createTemplate = async () => {
     const id = randomUUID();
     showHeader("Create");
 
-    const creationStyle = await CliService.select({
+    const creationStyle = await CliService.select<CreationType>({
         message: "Select creation style",
         options: [
             { value: "wizard", label: "Wizard", hint: "Create template through a wizard" },
@@ -181,13 +222,20 @@ const createTemplate = async () => {
                 value: "folder",
                 hint: "Create template from existing folder",
             },
+            {
+                label: "File",
+                value: "file",
+                hint: "Create template from existing file in current directory",
+            },
         ],
     });
 
     if (creationStyle === "wizard") {
         await createTemplateFromWizard(id);
-    } else {
+    } else if (creationStyle === "folder") {
         await createTemplateFromFolder(id);
+    } else {
+        await createTemplateFromFile(id);
     }
 };
 

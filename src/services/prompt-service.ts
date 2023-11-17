@@ -40,6 +40,29 @@ const directory = async () => {
     return dir;
 };
 
+const file = async () => {
+    const files = await globby("*", {
+        onlyFiles: true,
+        gitignore: true,
+        cwd: process.cwd(),
+    });
+
+    if (files.length === 0) {
+        Logger.debug("No files found");
+        return ".";
+    }
+
+    const selectedFile = await CliService.select({
+        message: "Select file",
+        options: files.map(f => ({
+            value: f,
+            label: f,
+        })),
+    });
+
+    return selectedFile;
+};
+
 const templateName = async ({
     onError,
     defaultValue,
@@ -127,4 +150,5 @@ export const PromptService = {
     templateAction,
     settingsAction,
     editor,
+    file,
 };

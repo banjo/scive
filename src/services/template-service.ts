@@ -193,7 +193,11 @@ const createTemplateFromFile = async (id: string) => {
     const description = await PromptService.templateDescription({ onError });
     const tags = await PromptService.templateTags({ onError });
 
-    const variables = parseTemplateVariableNames(fileName);
+    const variables = uniq([
+        ...parseTemplateVariableNames(fileName),
+        ...parseTemplateVariableNames(fileName),
+    ]);
+
     const templateVariables = await PromptService.templateVariables(variables, onError);
 
     const template = Template.from({

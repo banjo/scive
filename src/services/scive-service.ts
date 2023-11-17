@@ -45,6 +45,7 @@ const removeTemplate = (template: Template) => {
     FileService.removeDirectory(`${TEMPLATES_DIRECTORY}/${template.id}`);
 };
 
+const toRemove = new Set([".DS_Store"]);
 /**
  * Removes config without a corresponding template file.
  * Adds basic config for template files without a corresponding config.
@@ -53,7 +54,9 @@ const handleUnsyncedTemplates = () => {
     const config = ConfigService.loadConfig();
     const configTemplates = config.templates;
 
-    const templateFiles = FileService.readDirectory(TEMPLATES_DIRECTORY);
+    const templateFiles = FileService.readDirectory(TEMPLATES_DIRECTORY).filter(
+        file => !toRemove.has(file)
+    );
 
     const templatesToAddConfigFor = templateFiles.filter(templateFile => {
         const templateConfig = configTemplates.find(template => template.id === templateFile);

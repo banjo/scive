@@ -58,7 +58,7 @@ scive
 scive create
 ```
 
-Follow the interactive prompts to set up your custom template. You can add multiple files with custom names and content. Use `handlebars` to add dynamic content to your templates. There are two ways to add content:
+Follow the interactive prompts to set up your custom template. You can add multiple files with custom names and content. Use `handlebars` to add dynamic content to your templates. There are three ways to add content:
 
 ### Add files manually - the wizard will guide you through the process.
 
@@ -68,7 +68,9 @@ Follow the interactive prompts to set up your custom template. You can add multi
 
 ![Demo](https://imgur.com/mzOJfNr.gif)
 
-This run helper will prompt you what template to use, which values to use for the dynamic content and where to save the new files.
+### Select a file - the wizard will automatically add the selected file.
+
+![Demo](https://imgur.com/hbBg5o9.gif)
 
 ## Modify templates
 

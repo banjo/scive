@@ -1,6 +1,7 @@
+import { isDev } from "@/runtime";
 import { homedir } from "node:os";
 
-export const FOLDER_NAME = ".scive";
+export const FOLDER_NAME = isDev() ? ".scive-dev" : ".scive";
 export const FOLDER_DIRECTORY = `${homedir()}/${FOLDER_NAME}`;
 
 export const SCIVE_JSON_FILE_NAME = "scive.json";

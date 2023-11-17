@@ -193,8 +193,15 @@ const createTemplateFromFile = async (id: string) => {
     const description = await PromptService.templateDescription({ onError });
     const tags = await PromptService.templateTags({ onError });
 
+    const content = FileService.readFile(`${newPath}/${fileName}.hbs`);
+
+    if (!isDefined(content)) {
+        Logger.error(`Could not read file ${fileName}`);
+        process.exit(1);
+    }
+
     const variables = uniq([
-        ...parseTemplateVariableNames(fileName),
+        ...parseTemplateVariableNames(content),
         ...parseTemplateVariableNames(fileName),
     ]);
 

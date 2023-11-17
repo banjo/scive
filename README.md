@@ -2,9 +2,9 @@
 
 Scaffold your projects effortlessly with custom templates.
 
-![Demo](https://imgur.com/f6Q2cUP.gif)
+![Demo](https://imgur.com/xY6wVhZ.gif)
 
-> Demo of creating a template via the wizard and scaffolding it easily
+> Demo of scaffolding a new file from a custom template
 
 [![NPM version](https://img.shields.io/npm/v/scive?color=%2351A8DD&label=%20)](https://www.npmjs.com/package/scive)
 
@@ -36,7 +36,7 @@ npx scive
 
 ## Scaffolding a Templates
 
-![Demo](https://imgur.com/NCSfKhY.gif)
+![Demo](https://imgur.com/xY6wVhZ.gif)
 
 Once a template is created, you can scaffold new files with a simple command:
 
@@ -62,7 +62,7 @@ Follow the interactive prompts to set up your custom template. You can add multi
 
 ### Add files manually - the wizard will guide you through the process.
 
-![Demo](https://imgur.com/ZfP4Pel.gif)
+![Demo](https://imgur.com/OFSmhbZ.gif)
 
 ### Select a folder - the wizard will automatically add all files in the folder.
 

@@ -8,6 +8,7 @@ import { FileService } from "@/services/file-service";
 import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
 import { clear, highlight, newline, showHeader, standout } from "@/utils/cli-util";
+import { TemplateUtil } from "@/utils/template-util";
 import { isDefined, isUUID, uniq } from "@banjoanton/utils";
 import Handlebars from "handlebars";
 import { randomUUID } from "node:crypto";
@@ -123,9 +124,9 @@ const createTemplateFromWizard = async (id: string) => {
         id,
         description,
         name,
-        tags: tags.split(","),
+        tags: TemplateUtil.commaSeparatedToSanitizedArray(tags),
         files: files.map(f => f.name),
-        variables: variables.split(","),
+        variables: TemplateUtil.commaSeparatedToSanitizedArray(variables),
     });
 
     ConfigService.addTemplateConfig(template);
@@ -159,8 +160,8 @@ const createTemplateFromFolder = async (id: string) => {
         id,
         description,
         name,
-        tags: tags.split(","),
-        variables: templateVariables === "" ? [] : templateVariables.split(",").map(v => v.trim()),
+        tags: TemplateUtil.commaSeparatedToSanitizedArray(tags),
+        variables: TemplateUtil.commaSeparatedToSanitizedArray(templateVariables),
         files,
     });
 
@@ -199,8 +200,8 @@ const createTemplateFromFile = async (id: string) => {
         id,
         description,
         name,
-        tags: tags.split(","),
-        variables: templateVariables === "" ? [] : templateVariables.split(",").map(v => v.trim()),
+        tags: TemplateUtil.commaSeparatedToSanitizedArray(tags),
+        variables: TemplateUtil.commaSeparatedToSanitizedArray(templateVariables),
         files: [fileName],
     });
 

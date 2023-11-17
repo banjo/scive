@@ -9,4 +9,4 @@ export const setDebug = (value: boolean) => {
     FileService.assureFile(LOG_FILE_DIRECTORY);
 };
 export const isDebug = () => DEBUG;
-export const isDev = () => process.env.NODE_ENV !== "production";
+export const isDev = () => process.env.NODE_ENV === "development";

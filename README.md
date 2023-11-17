@@ -4,6 +4,8 @@ Scaffold your projects effortlessly with custom templates.
 
 ![Demo](/.github/assets/demo.gif)
 
+> Demo of creating a template via the wizard and scaffolding it easily
+
 [![NPM version](https://img.shields.io/npm/v/scive?color=%2351A8DD&label=%20)](https://www.npmjs.com/package/scive)
 
 -   🚀 - Quickly create custom templates for any project
@@ -32,6 +34,20 @@ scive
 npx scive
 ```
 
+## Scaffolding a Templates
+
+![Demo](/.github/assets/scaffold.gif)
+
+Once a template is created, you can scaffold new files with a simple command:
+
+```bash
+# Select run
+scive
+
+# Or go to the run helper directly
+scive run
+```
+
 ## Creating Templates
 
 ```bash
@@ -44,22 +60,43 @@ scive create
 
 Follow the interactive prompts to set up your custom template. You can add multiple files with custom names and content. Use `handlebars` to add dynamic content to your templates. There are two ways to add content:
 
--   Add files manually - the wizard will guide you through the process.
--   Select a folder - the wizard will automatically add all files in the folder.
+### Add files manually - the wizard will guide you through the process.
 
-## Scaffolding with Templates
+![Demo](/.github/assets/create-wizard.gif)
 
-Once a template is created, you can scaffold new files with a simple command:
+### Select a folder - the wizard will automatically add all files in the folder.
 
-```bash
-# Select run
-scive
-
-# Or go to the run helper directly
-scive run
-```
+![Demo](/.github/assets/create-folder.gif)
 
 This run helper will prompt you what template to use, which values to use for the dynamic content and where to save the new files.
+
+## Modify templates
+
+![Demo](/.github/assets/list.gif)
+
+You can modify any templates you've created with following command:
+
+```bash
+# Select list
+scive
+
+# Or go to the modify helper directly
+scive list
+```
+
+## Settings
+
+![Demo](/.github/assets/settings.gif)
+
+Update your general settings (debug, editor, etc.) with following command:
+
+```bash
+# Select settings
+scive
+
+# Or go to the settings helper directly
+scive settings
+```
 
 ## Contribution
 

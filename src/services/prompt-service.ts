@@ -25,10 +25,16 @@ const directory = async () => {
 
     const dir = await CliService.select({
         message: "Select directory",
-        options: subdirectories.map(subdirectory => ({
-            value: subdirectory,
-            label: subdirectory,
-        })),
+        options: [
+            {
+                value: ".",
+                label: "./ (current directory)",
+            },
+            ...subdirectories.map(subdirectory => ({
+                value: subdirectory,
+                label: subdirectory,
+            })),
+        ],
     });
 
     return dir;

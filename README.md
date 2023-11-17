@@ -2,7 +2,7 @@
 
 Scaffold your projects effortlessly with custom templates.
 
-![Demo](/.github/assets/demo.gif)
+![Demo](https://imgur.com/f6Q2cUP.gif)
 
 > Demo of creating a template via the wizard and scaffolding it easily
 
@@ -36,7 +36,7 @@ npx scive
 
 ## Scaffolding a Templates
 
-![Demo](/.github/assets/scaffold.gif)
+![Demo](https://imgur.com/NCSfKhY.gif)
 
 Once a template is created, you can scaffold new files with a simple command:
 
@@ -62,17 +62,17 @@ Follow the interactive prompts to set up your custom template. You can add multi
 
 ### Add files manually - the wizard will guide you through the process.
 
-![Demo](/.github/assets/create-wizard.gif)
+![Demo](https://imgur.com/ZfP4Pel.gif)
 
 ### Select a folder - the wizard will automatically add all files in the folder.
 
-![Demo](/.github/assets/create-folder.gif)
+![Demo](https://imgur.com/mzOJfNr.gif)
 
 This run helper will prompt you what template to use, which values to use for the dynamic content and where to save the new files.
 
 ## Modify templates
 
-![Demo](/.github/assets/list.gif)
+![Demo](https://imgur.com/Z8DuLfk.gif)
 
 You can modify any templates you've created with following command:
 
@@ -86,7 +86,7 @@ scive list
 
 ## Settings
 
-![Demo](/.github/assets/settings.gif)
+![Demo](https://imgur.com/6ieeKdV.gif)
 
 Update your general settings (debug, editor, etc.) with following command:
 

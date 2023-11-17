@@ -1,5 +1,5 @@
 import { Logger } from "@/logger";
-import { Maybe, tryOrDefault } from "@banjoanton/utils";
+import { isDefined, Maybe, tryOrDefault } from "@banjoanton/utils";
 import fs from "node:fs";
 import { dirname } from "node:path";
 
@@ -37,7 +37,7 @@ const writeFile = ({ content, path }: TemplateFileProps) => {
 const readFile = (path: string): Maybe<string> => {
     try {
         const content = fs.readFileSync(path, "utf8");
-        if (content === undefined) {
+        if (!isDefined(content)) {
             Logger.debug(`Could not read file ${path}`);
             return undefined;
         }
@@ -181,4 +181,6 @@ export const FileService = {
     copyDirectory,
     copyFile,
     appendToFile,
+    assureFile,
+    assureDirectory,
 };

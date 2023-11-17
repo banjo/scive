@@ -7,7 +7,7 @@ import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
 import { TemplateService } from "@/services/template-service";
 import { newline, standout } from "@/utils/cli-util";
-import { isEmpty, tryOrDefault } from "@banjoanton/utils";
+import { isDefined, isEmpty, tryOrDefault } from "@banjoanton/utils";
 
 export const init = () => {
     const hasFolderDirectory = FileService.checkIfExists(FOLDER_DIRECTORY);
@@ -116,7 +116,7 @@ const createTemplateFile = async (id: string): Promise<TemplateFile> => {
     await CliService.openInEditor(newPath);
     const fileContent = FileService.readFile(newPath);
 
-    if (!fileContent) {
+    if (!isDefined(fileContent)) {
         Logger.error(`Could not read file ${newPath}`);
         process.exit(1);
     }

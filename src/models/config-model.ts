@@ -1,13 +1,16 @@
 import { Logger } from "@/logger";
+import { Editor } from "@/models/editor-model";
 import { Template } from "@/models/template-model";
 
 export type Config = {
     debug: boolean;
+    editor?: Editor;
     templates: Template[];
 };
 
 const defaultConfig: Config = {
     debug: false,
+    editor: undefined,
     templates: [],
 };
 

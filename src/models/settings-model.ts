@@ -4,14 +4,16 @@ import { Config } from "@/models/config-model";
 import { CliService } from "@/services/cli-service";
 import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
+import { PromptService } from "@/services/prompt-service";
 import { AsyncCallbackWithArgs, CallbackWithArgs } from "@banjoanton/utils";
 
-export const SETTINGS = ["debug", "logs"] as const;
+export const SETTINGS = ["debug", "logs", "editor"] as const;
 export type Setting = (typeof SETTINGS)[number];
 
 const settingDescription: Record<Setting, string> = {
     debug: "Toggle debug mode, saves debug logs to scive-debug.log",
     logs: "Open logs file",
+    editor: "Change default editor",
 };
 
 export const getSettingDescription = (setting: Setting) => settingDescription[setting];
@@ -35,6 +37,11 @@ const settingsActions: Record<Setting, CallbackWithArgs<Config> | AsyncCallbackW
 
         Logger.debug(`Opening logs file: ${LOG_FILE_DIRECTORY}`);
         CliService.openInEditor(LOG_FILE_DIRECTORY);
+    },
+    editor: async (config: Config) => {
+        const editor = await PromptService.editor();
+        const updatedConfig = { ...config, editor };
+        ConfigService.updateConfig(updatedConfig);
     },
 };
 

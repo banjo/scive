@@ -1,6 +1,9 @@
 import { Logger } from "@/logger";
+import { getEditorCommand } from "@/models/editor-model";
+import { ConfigService } from "@/services/config-service";
 import { FileService } from "@/services/file-service";
-import { Callback, isSymbol, tryOrDefaultAsync } from "@banjoanton/utils";
+import { PromptService } from "@/services/prompt-service";
+import { Callback, isDefined, isSymbol, tryOrDefaultAsync } from "@banjoanton/utils";
 import consola from "consola";
 import { execa, Options } from "execa";
 
@@ -111,12 +114,7 @@ const isCodeInstalled = async () => {
     return isInstalled;
 };
 
-const openInEditor = async (
-    path: string,
-    config?: { waitForClose: boolean; newWindow: boolean }
-) => {
-    const { waitForClose = true, newWindow = false } = config ?? {};
-
+const openInEditor = async (path: string) => {
     const fileExists = FileService.checkIfExists(path);
 
     if (!fileExists) {
@@ -124,15 +122,21 @@ const openInEditor = async (
         FileService.writeFile({ path, content: "" });
     }
 
-    const isInstalled = await isCodeInstalled();
-
-    if (!isInstalled) {
-        Logger.warning("Must have VSCode installed to open in editor");
-        return;
+    const cfg = ConfigService.loadConfig();
+    let editor = cfg.editor;
+    if (!isDefined(editor)) {
+        editor = await PromptService.editor();
+        ConfigService.updateConfig({ ...cfg, editor });
     }
 
-    Logger.log(`Opening ${path} in editor${waitForClose ? ", waiting for close" : ""}`);
-    await execute(`code ${waitForClose ? "--wait" : ""} ${newWindow ? "-n" : ""} ${path}`);
+    const command = getEditorCommand(editor);
+
+    Logger.log(`Opening ${path} in editor ${editor}`);
+    if (editor === "code") {
+        await execute(`${command} ${path}`);
+    } else {
+        await execute(`${command} ${path}`, { stdio: "inherit" });
+    }
 };
 
 const openFolderInEditor = async (

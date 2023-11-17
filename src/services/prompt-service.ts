@@ -1,4 +1,5 @@
 import { Logger } from "@/logger";
+import { Editor, EDITORS } from "@/models/editor-model";
 import { getSettingDescription, Setting, SETTINGS } from "@/models/settings-model";
 import {
     getTemplateActionDescription,
@@ -102,6 +103,15 @@ const settingsAction = async () =>
         })),
     });
 
+const editor = async () =>
+    await CliService.select<Editor>({
+        message: "Select editor (will be saved in config)",
+        options: EDITORS.map(e => ({
+            value: e,
+            label: e,
+        })),
+    });
+
 export const PromptService = {
     directory,
     templateName,
@@ -110,4 +120,5 @@ export const PromptService = {
     templateVariables,
     templateAction,
     settingsAction,
+    editor,
 };

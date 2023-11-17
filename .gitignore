@@ -12,3 +12,5 @@ temp
 test.js
 test.cjs
 libby
+.yalc
+yalc.lock

@@ -9,9 +9,8 @@ import { PromptService } from "@/services/prompt-service";
 import { SciveService } from "@/services/scive-service";
 import { clear, highlight, newline, showHeader, standout } from "@/utils/cli-util";
 import { TemplateUtil } from "@/utils/template-util";
-import { isDefined, isUUID, uniq } from "@banjoanton/utils";
+import { isDefined, isUUID, uniq, uuid } from "@banjoanton/utils";
 import Handlebars from "handlebars";
-import { randomUUID } from "node:crypto";
 import { UnknownRecord } from "type-fest";
 
 const parseTemplate = (template: string, data: UnknownRecord) => Handlebars.compile(template)(data);
@@ -41,7 +40,7 @@ const sanitizeFolder = (folderName: string) => {
         id = folderName;
         name = folderName;
     } else {
-        id = randomUUID();
+        id = uuid();
         name = folderName;
         FileService.moveDirectory(
             `${TEMPLATES_DIRECTORY}/${folderName}`,
@@ -222,7 +221,7 @@ const createTemplateFromFile = async (id: string) => {
 
 type CreationType = "wizard" | "folder" | "file";
 const createTemplate = async () => {
-    const id = randomUUID();
+    const id = uuid();
     showHeader("Create");
 
     const creationStyle = await CliService.select<CreationType>({

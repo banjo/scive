@@ -2,7 +2,7 @@
 
 Scaffold your projects effortlessly with custom templates.
 
-![Demo](https://imgur.com/f6Q2cUP.gif)
+<img src="https://imgur.com/f6Q2cUP.gif?raw=true" width="500px">
 
 > Demo of creating a template via the wizard and scaffolding it easily
 
@@ -36,7 +36,7 @@ npx scive
 
 ## Scaffolding a Templates
 
-![Demo](https://imgur.com/NCSfKhY.gif)
+<img src="https://imgur.com/NCSfKhY.gif?raw=true" width="500px">
 
 Once a template is created, you can scaffold new files with a simple command:
 
@@ -62,17 +62,17 @@ Follow the interactive prompts to set up your custom template. You can add multi
 
 ### Add files manually - the wizard will guide you through the process.
 
-![Demo](https://imgur.com/ZfP4Pel.gif)
+<img src="https://imgur.com/ZfP4Pel.gif?raw=true" width="500px">
 
 ### Select a folder - the wizard will automatically add all files in the folder.
 
-![Demo](https://imgur.com/mzOJfNr.gif)
+<img src="https://imgur.com/mzOJfNr.gif?raw=true" width="500px">
 
 This run helper will prompt you what template to use, which values to use for the dynamic content and where to save the new files.
 
 ## Modify templates
 
-![Demo](https://imgur.com/Z8DuLfk.gif)
+<img src="https://imgur.com/Z8DuLfk.gif?raw=true" width="500px">
 
 You can modify any templates you've created with following command:
 
@@ -86,7 +86,7 @@ scive list
 
 ## Settings
 
-![Demo](https://imgur.com/6ieeKdV.gif)
+<img src="https://imgur.com/6ieeKdV.gif?raw=true" width="500px">
 
 Update your general settings (debug, editor, etc.) with following command:
 

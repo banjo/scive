@@ -35,7 +35,7 @@
         "lint": "eslint --ext .js,.ts,.json .",
         "prepublishOnly": "nr build",
         "release": "bumpp && npm publish",
-        "start": "tsx src/bin.ts",
+        "start": "NODE_ENV=development tsx src/bin.ts",
         "test": "vitest --watch=false",
         "test:dev": "vitest",
         "typecheck": "tsc --noEmit",

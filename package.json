@@ -45,6 +45,7 @@
         "citty": "^0.1.4",
         "consola": "^3.2.3",
         "debug": "^4.3.4",
+        "enquirer": "^2.4.1",
         "execa": "^8.0.1",
         "globby": "^14.0.0",
         "handlebars": "^4.7.8",

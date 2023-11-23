@@ -9,7 +9,9 @@ import {
 import { CliService } from "@/services/cli-service";
 import { standout } from "@/utils/cli-util";
 import { Callback, capitalize } from "@banjoanton/utils";
+import pkg from "enquirer";
 import { globby } from "globby";
+const { prompt } = pkg;
 
 const directory = async () => {
     const subdirectories = await globby("**/*", {
@@ -23,25 +25,18 @@ const directory = async () => {
         return ".";
     }
 
-    const dir = await CliService.select({
+    const answer: { dir: string } = await prompt({
+        type: "autocomplete",
         message: "Select directory",
-        options: [
-            {
-                value: ".",
-                label: "./ (current directory)",
-            },
-            ...subdirectories.map(subdirectory => ({
-                value: subdirectory,
-                label: subdirectory,
-            })),
-        ],
+        choices: ["./", ...subdirectories],
+        name: "dir",
     });
 
-    return dir;
+    return answer.dir;
 };
 
 const file = async () => {
-    const files = await globby("*", {
+    const files = await globby("**/*", {
         onlyFiles: true,
         gitignore: true,
         cwd: process.cwd(),
@@ -52,15 +47,14 @@ const file = async () => {
         return ".";
     }
 
-    const selectedFile = await CliService.select({
+    const answer: { file: string } = await prompt({
+        type: "autocomplete",
         message: "Select file",
-        options: files.map(f => ({
-            value: f,
-            label: f,
-        })),
+        choices: files,
+        name: "file",
     });
 
-    return selectedFile;
+    return answer.file;
 };
 
 const templateName = async ({

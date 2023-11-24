@@ -44,7 +44,7 @@ const file = async () => {
 
     if (files.length === 0) {
         Logger.debug("No files found");
-        return ".";
+        return undefined;
     }
 
     const answer: { file: string } = await prompt({

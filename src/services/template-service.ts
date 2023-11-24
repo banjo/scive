@@ -172,6 +172,11 @@ const createTemplateFromFile = async (id: string) => {
     showHeader("Template from file");
     const file = await PromptService.file();
 
+    if (!isDefined(file)) {
+        Logger.error(`Did not find any files`);
+        process.exit(1);
+    }
+
     const newPath = `${TEMPLATES_DIRECTORY}/${id}`;
     FileService.createDirectory(newPath);
 

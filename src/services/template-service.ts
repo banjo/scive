@@ -294,7 +294,7 @@ const runTemplate = async () => {
 
     for (const file of templateFiles) {
         const templateContent = FileService.readFile(
-            `${TEMPLATES_DIRECTORY}/${template.id}/${file}`
+            `${TEMPLATES_DIRECTORY}/${template.id}/${file}.hbs`
         );
 
         if (!templateContent) {
